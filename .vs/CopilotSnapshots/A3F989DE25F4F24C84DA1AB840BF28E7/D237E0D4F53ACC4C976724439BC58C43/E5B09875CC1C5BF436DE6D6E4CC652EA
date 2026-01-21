@@ -1,0 +1,263 @@
+﻿# Quick Start Guide - StudyMate Authentication
+
+## 🔐 Default Admin Account
+
+Hệ thống tự động tạo tài khoản admin mặc định khi khởi động:
+
+**Credentials:**
+- **Email**: `admin@studymate.com`
+- **Password**: `Admin@123456`
+- **Role**: `admin`
+
+⚠️ **Lưu ý bảo mật**: Đổi password ngay sau khi đăng nhập lần đầu trong production!
+
+### Đăng nhập Admin:
+```json
+POST /api/auth/login
+{
+  "email": "admin@studymate.com",
+  "password": "Admin@123456"
+}
+```
+
+---
+
+## Bước 1: Chuẩn bị Database (5 phút)
+
+1. Mở SQL Server Management Studio
+2. Kết nối đến SQL Server instance của bạn
+3. Chạy script tạo bảng:
+
+```sql
+USE StudyMate;
+GO
+
+-- Tạo bảng refresh_tokens
+CREATE TABLE refresh_tokens (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    user_id INT NOT NULL,
+    token NVARCHAR(500) NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    is_revoked BIT DEFAULT 0,
+    CONSTRAINT FK_RefreshToken_User FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IX_RefreshTokens_Token ON refresh_tokens(token);
+CREATE INDEX IX_RefreshTokens_UserId ON refresh_tokens(user_id);
+
+-- Tạo bảng otp_codes
+CREATE TABLE otp_codes (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    email VARCHAR(255) NOT NULL,
+    code VARCHAR(6) NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    is_used BIT DEFAULT 0
+);
+
+CREATE INDEX IX_OtpCodes_Email ON otp_codes(email);
+CREATE INDEX IX_OtpCodes_Code ON otp_codes(code);
+```
+
+## Bước 2: Cấu hình Gmail cho gửi OTP (10 phút)
+
+### Tạo App Password trong Gmail:
+
+1. Đăng nhập Gmail của bạn
+2. Truy cập: https://myaccount.google.com/security
+3. Bật "2-Step Verification" (nếu chưa bật)
+4. Truy cập: https://myaccount.google.com/apppasswords
+5. Chọn app: "Mail", device: "Other" → đặt tên "StudyMate"
+6. Click "Generate" → Copy mã 16 ký tự
+
+### Cập nhật appsettings.json:
+
+Mở file `StudyMate_BE/appsettings.json` và cập nhật:
+
+```json
+"EmailSettings": {
+  "FromEmail": "your-email@gmail.com",      // ← Email của bạn
+  "FromName": "StudyMate",
+  "SmtpServer": "smtp.gmail.com",
+  "SmtpPort": "587",
+  "Username": "your-email@gmail.com",       // ← Email của bạn
+  "Password": "xxxx xxxx xxxx xxxx"         // ← App Password (16 ký tự)
+}
+```
+
+### (Optional) Thay đổi Admin mặc định:
+
+```json
+"DefaultAdmin": {
+  "Email": "admin@studymate.com",
+  "Password": "Admin@123456",
+  "FullName": "System Administrator"
+}
+```
+
+## Bước 3: Chạy ứng dụng (2 phút)
+
+```bash
+cd StudyMate_BE
+dotnet restore
+dotnet run
+```
+
+Ứng dụng sẽ tự động:
+1. ✅ Tạo admin user nếu chưa tồn tại
+2. ✅ Mở browser với Swagger UI
+
+**URLs:**
+- **HTTPS**: `https://localhost:7259`
+- **HTTP**: `http://localhost:5149`
+
+Hoặc bấm F5 trong Visual Studio để chạy.
+
+## Bước 4: Test API với Swagger (5 phút)
+
+Swagger UI sẽ tự động mở khi chạy ứng dụng. Nếu không, truy cập thủ công:
+- `https://localhost:7259` hoặc
+- `http://localhost:5149`
+
+### Test Login Admin:
+   - Click `/api/auth/login`
+   - Click "Try it out"
+   - Paste:
+   ```json
+   {
+     "email": "admin@studymate.com",
+     "password": "Admin@123456"
+   }
+   ```
+   - Click "Execute"
+   - Copy `accessToken` từ response
+
+### Test Authorize:
+   - Click nút "Authorize" ở đầu trang
+   - Nhập: `Bearer {paste-access-token-here}`
+   - Click "Authorize"
+   - Thử gọi `/api/auth/me` → Sẽ thấy role: "admin"
+
+### Test Register Student/Teacher:
+   - Click `/api/auth/register`
+   - Click "Try it out"
+   - Paste:
+   ```json
+   {
+     "fullName": "Test User",
+     "email": "your-real-email@gmail.com",
+     "password": "Test123!",
+     "role": "student"
+   }
+   ```
+   - Click "Execute"
+   - Check email để lấy OTP
+
+### Test Verify OTP:
+   - Click `/api/auth/verify-otp`
+   - Paste:
+   ```json
+   {
+     "email": "your-real-email@gmail.com",
+     "code": "123456"
+   }
+   ```
+   - Click "Execute"
+   - Copy `accessToken` từ response
+
+## Luồng test nhanh:
+
+```
+1. Login Admin (test ngay không cần OTP)
+   ↓
+2. Register Student/Teacher (email thật để nhận OTP)
+   ↓
+3. Check email → lấy mã OTP
+   ↓
+4. Verify OTP → nhận tokens
+   ↓
+5. Login Student/Teacher
+   ↓
+6. Call /me (test protected endpoint)
+   ↓
+7. Refresh token (sau 15 phút)
+   ↓
+8. Logout
+```
+
+## Troubleshooting nhanh:
+
+### Admin không được tạo
+- ✅ Check console logs khi start app
+- ✅ Check database: `SELECT * FROM users WHERE role = 'admin'`
+- ✅ Nếu lỗi, xóa user cũ và restart app
+
+### Swagger không mở
+- ✅ Chạy bằng `dotnet run` hoặc F5 trong Visual Studio
+- ✅ Truy cập thủ công: `https://localhost:7259`
+- ✅ Kiểm tra firewall không block port
+
+### "Failed to send OTP email"
+- ✅ Check email settings trong appsettings.json
+- ✅ Dùng App Password, không dùng password Gmail thường
+- ✅ Bật "2-Step Verification" trong Gmail
+
+### "Invalid email or password"
+- ✅ Password phải có ít nhất 6 ký tự
+- ✅ Email phải đúng format
+
+### "OTP has expired"
+- ✅ OTP chỉ có hiệu lực 10 phút
+- ✅ Register lại để nhận OTP mới
+
+### "Email is already registered"
+- ✅ Mỗi email chỉ đăng ký 1 lần
+- ✅ Dùng email khác hoặc xóa user trong database
+
+### Token không work
+- ✅ Check format: "Bearer {token}" (có dấu cách)
+- ✅ Token expire sau 15 phút, dùng refresh token
+
+## Kiểm tra Database:
+
+```sql
+-- Check admin user
+SELECT * FROM users WHERE role = 'admin';
+
+-- Check users đã đăng ký
+SELECT * FROM users;
+
+-- Check students/teachers
+SELECT * FROM students;
+SELECT * FROM teachers;
+
+-- Check OTP codes
+SELECT * FROM otp_codes ORDER BY created_at DESC;
+
+-- Check refresh tokens
+SELECT * FROM refresh_tokens WHERE is_revoked = 0;
+```
+
+## Production Checklist:
+
+- [ ] **ĐỔI ADMIN PASSWORD** (quan trọng!)
+- [ ] Đổi JWT SecretKey thành key mạnh hơn
+- [ ] Lưu secrets trong environment variables
+- [ ] Enable HTTPS
+- [ ] Configure CORS đúng domain
+- [ ] Add rate limiting
+- [ ] Setup logging và monitoring
+- [ ] Backup database
+- [ ] Test với nhiều users
+- [ ] Disable admin auto-seed trong production
+
+## Support:
+
+Nếu gặp vấn đề:
+1. Check console logs
+2. Check SQL Server logs
+3. Check email settings
+4. Đọc README_AUTH.md để biết chi tiết
+
+Happy coding! 🚀

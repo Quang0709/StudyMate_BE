@@ -1,0 +1,614 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\StudyMate_BE\\StudyMate_BE\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|d:\\studymate_be\\studymate_be\\studymate_be\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|solutionrelative:studymate_be\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|d:\\studymate_be\\studymate_be\\studymate_be\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|solutionrelative:studymate_be\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\StudyMate_BE\\StudyMate_BE\\docker-compose.yml||{8B382828-6202-11D1-8870-0000F87579D2}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:docker-compose.yml||{8B382828-6202-11D1-8870-0000F87579D2}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|d:\\studymate_be\\studymate_be\\studymate_be\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|solutionrelative:studymate_be\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|d:\\studymate_be\\studymate_be\\repository\\repository.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|solutionrelative:repository\\repository.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|d:\\studymate_be\\studymate_be\\repository\\dbcontext\\studymatecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|solutionrelative:repository\\dbcontext\\studymatecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|d:\\studymate_be\\studymate_be\\studymate_be\\studymate_be.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|solutionrelative:studymate_be\\studymate_be.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|d:\\studymate_be\\studymate_be\\service\\service.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|solutionrelative:service\\service.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|d:\\studymate_be\\studymate_be\\repository\\model\\refreshtoken.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|solutionrelative:repository\\model\\refreshtoken.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|d:\\studymate_be\\studymate_be\\repository\\model\\otpcode.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|solutionrelative:repository\\model\\otpcode.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|d:\\studymate_be\\studymate_be\\repository\\interface\\igenericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|solutionrelative:repository\\interface\\igenericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|d:\\studymate_be\\studymate_be\\repository\\interface\\iunitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|solutionrelative:repository\\interface\\iunitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|d:\\studymate_be\\studymate_be\\repository\\implement\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|solutionrelative:repository\\implement\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|d:\\studymate_be\\studymate_be\\repository\\implement\\unitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3CEE15AC-62D6-43F6-9D9A-C0821AA5949E}|Repository\\Repository.csproj|solutionrelative:repository\\implement\\unitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|d:\\studymate_be\\studymate_be\\service\\dtos\\registerdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|solutionrelative:service\\dtos\\registerdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|d:\\studymate_be\\studymate_be\\service\\dtos\\verifyotpdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|solutionrelative:service\\dtos\\verifyotpdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|d:\\studymate_be\\studymate_be\\service\\dtos\\logindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|solutionrelative:service\\dtos\\logindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|d:\\studymate_be\\studymate_be\\service\\dtos\\authresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|solutionrelative:service\\dtos\\authresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|d:\\studymate_be\\studymate_be\\service\\dtos\\refreshtokendto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|solutionrelative:service\\dtos\\refreshtokendto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|d:\\studymate_be\\studymate_be\\service\\interface\\iemailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|solutionrelative:service\\interface\\iemailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|d:\\studymate_be\\studymate_be\\service\\interface\\iauthservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|solutionrelative:service\\interface\\iauthservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|d:\\studymate_be\\studymate_be\\service\\interface\\itokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|solutionrelative:service\\interface\\itokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|d:\\studymate_be\\studymate_be\\service\\implement\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|solutionrelative:service\\implement\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|d:\\studymate_be\\studymate_be\\service\\implement\\tokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B9B0D638-CA1C-4F35-8A43-6DC621DACAE3}|Service\\Service.csproj|solutionrelative:service\\implement\\tokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|d:\\studymate_be\\studymate_be\\studymate_be\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|solutionrelative:studymate_be\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|d:\\studymate_be\\studymate_be\\studymate_be\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|solutionrelative:studymate_be\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\StudyMate_BE\\StudyMate_BE\\QUICKSTART.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:QUICKSTART.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|d:\\studymate_be\\studymate_be\\studymate_be\\backgroundservices\\adminseederservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{42AA9E1E-E006-42AD-9B56-E493A8EDD219}|StudyMate_BE\\StudyMate_BE.csproj|solutionrelative:studymate_be\\backgroundservices\\adminseederservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\StudyMate_BE\\StudyMate_BE\\README_AUTH.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:README_AUTH.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\StudyMate_BE\\StudyMate_BE\\ADMIN_GUIDE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ADMIN_GUIDE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\StudyMate_BE\\StudyMate_BE\\TROUBLESHOOTING_401.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:TROUBLESHOOTING_401.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\StudyMate_BE\\StudyMate_BE\\TEST_AUTH_FLOW.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:TEST_AUTH_FLOW.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\StudyMate_BE\\StudyMate_BE\\Dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\StudyMate_BE\\StudyMate_BE\\.dockerignore||{3B902123-F8A7-4915-9F01-361F908088D0}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.dockerignore||{3B902123-F8A7-4915-9F01-361F908088D0}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\StudyMate_BE\\StudyMate_BE\\Database\\Migrations\\init-docker.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Database\\Migrations\\init-docker.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\StudyMate_BE\\StudyMate_BE\\Database\\Migrations\\init-docker.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|CodeFrame",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Database\\Migrations\\init-docker.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|CodeFrame"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\StudyMate_BE\\StudyMate_BE\\docker-compose.override.yml||{8B382828-6202-11D1-8870-0000F87579D2}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:docker-compose.override.yml||{8B382828-6202-11D1-8870-0000F87579D2}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "docker-compose.override.yml",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\docker-compose.override.yml",
+              "RelativeDocumentMoniker": "docker-compose.override.yml",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\docker-compose.override.yml",
+              "RelativeToolTip": "docker-compose.override.yml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
+              "WhenOpened": "2026-01-21T03:28:21.925Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "init-docker.sql ",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Database\\Migrations\\init-docker.sql",
+              "RelativeDocumentMoniker": "Database\\Migrations\\init-docker.sql",
+              "ToolTip": "init-docker.sql ",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-01-21T03:28:06.788Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "docker-compose.yml",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\docker-compose.yml",
+              "RelativeDocumentMoniker": "docker-compose.yml",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\docker-compose.yml",
+              "RelativeToolTip": "docker-compose.yml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
+              "WhenOpened": "2026-01-21T03:27:13.269Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "Dockerfile",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Dockerfile",
+              "RelativeDocumentMoniker": "Dockerfile",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Dockerfile",
+              "RelativeToolTip": "Dockerfile",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-01-21T03:27:00.83Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\appsettings.json",
+              "RelativeDocumentMoniker": "StudyMate_BE\\appsettings.json",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\appsettings.json",
+              "RelativeToolTip": "StudyMate_BE\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAowB4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-01-20T19:06:54.805Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "StudyMate_BE\\appsettings.Development.json",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\appsettings.Development.json",
+              "RelativeToolTip": "StudyMate_BE\\appsettings.Development.json",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-01-20T19:06:53.018Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": ".dockerignore",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\.dockerignore",
+              "RelativeDocumentMoniker": ".dockerignore",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\.dockerignore",
+              "RelativeToolTip": ".dockerignore",
+              "ViewState": "AgIAADkAAAAAAAAAAIBJwDsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-01-21T03:27:22.639Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "TROUBLESHOOTING_401.md",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\TROUBLESHOOTING_401.md",
+              "RelativeDocumentMoniker": "TROUBLESHOOTING_401.md",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\TROUBLESHOOTING_401.md",
+              "RelativeToolTip": "TROUBLESHOOTING_401.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-01-21T02:44:51.011Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "TEST_AUTH_FLOW.md",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\TEST_AUTH_FLOW.md",
+              "RelativeDocumentMoniker": "TEST_AUTH_FLOW.md",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\TEST_AUTH_FLOW.md",
+              "RelativeToolTip": "TEST_AUTH_FLOW.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAANcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-01-21T02:58:31.566Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "StudyMate_BE\\Properties\\launchSettings.json",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\Properties\\launchSettings.json",
+              "RelativeToolTip": "StudyMate_BE\\Properties\\launchSettings.json",
+              "ViewState": "AgIAABIAAAAAAAAAAIBZwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-01-21T02:32:42.134Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "QUICKSTART.md",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\QUICKSTART.md",
+              "RelativeDocumentMoniker": "QUICKSTART.md",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\QUICKSTART.md",
+              "RelativeToolTip": "QUICKSTART.md",
+              "ViewState": "AgIAAAUBAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-01-21T02:33:36.181Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "AdminSeederService.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\BackgroundServices\\AdminSeederService.cs",
+              "RelativeDocumentMoniker": "StudyMate_BE\\BackgroundServices\\AdminSeederService.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\BackgroundServices\\AdminSeederService.cs",
+              "RelativeToolTip": "StudyMate_BE\\BackgroundServices\\AdminSeederService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAG8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-21T02:38:45.328Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "README_AUTH.md",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\README_AUTH.md",
+              "RelativeDocumentMoniker": "README_AUTH.md",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\README_AUTH.md",
+              "RelativeToolTip": "README_AUTH.md",
+              "ViewState": "AgIAAHsBAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-01-21T02:39:58.817Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\Program.cs",
+              "RelativeDocumentMoniker": "StudyMate_BE\\Program.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\Program.cs",
+              "RelativeToolTip": "StudyMate_BE\\Program.cs",
+              "ViewState": "AgIAAIsAAAAAAAAAAEBVwI8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-21T02:32:26.738Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "StudyMate_BE\\Controllers\\AuthController.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "StudyMate_BE\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAJAAAAAAAAAAAAASwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-21T02:43:56.827Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "ADMIN_GUIDE.md",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\ADMIN_GUIDE.md",
+              "RelativeDocumentMoniker": "ADMIN_GUIDE.md",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\ADMIN_GUIDE.md",
+              "RelativeToolTip": "ADMIN_GUIDE.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAPcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-01-21T02:40:44.637Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "TokenService.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Implement\\TokenService.cs",
+              "RelativeDocumentMoniker": "Service\\Implement\\TokenService.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Implement\\TokenService.cs",
+              "RelativeToolTip": "Service\\Implement\\TokenService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:06:30.365Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "EmailService.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Implement\\EmailService.cs",
+              "RelativeDocumentMoniker": "Service\\Implement\\EmailService.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Implement\\EmailService.cs",
+              "RelativeToolTip": "Service\\Implement\\EmailService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:06:18.819Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "ITokenService.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Interface\\ITokenService.cs",
+              "RelativeDocumentMoniker": "Service\\Interface\\ITokenService.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Interface\\ITokenService.cs",
+              "RelativeToolTip": "Service\\Interface\\ITokenService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:06:07.806Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "UnitOfWork.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Implement\\UnitOfWork.cs",
+              "RelativeDocumentMoniker": "Repository\\Implement\\UnitOfWork.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Implement\\UnitOfWork.cs",
+              "RelativeToolTip": "Repository\\Implement\\UnitOfWork.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:05:14.716Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "StudyMate_BE.csproj",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE.csproj",
+              "RelativeDocumentMoniker": "StudyMate_BE\\StudyMate_BE.csproj",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE\\StudyMate_BE.csproj",
+              "RelativeToolTip": "StudyMate_BE\\StudyMate_BE.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-01-20T19:03:41.804Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "StudyMateContext.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\DbContext\\StudyMateContext.cs",
+              "RelativeDocumentMoniker": "Repository\\DbContext\\StudyMateContext.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\DbContext\\StudyMateContext.cs",
+              "RelativeToolTip": "Repository\\DbContext\\StudyMateContext.cs",
+              "ViewState": "AgIAAIkAAAAAAAAAAAAAwJYAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T18:56:34.804Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Repository.csproj",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Repository.csproj",
+              "RelativeDocumentMoniker": "Repository\\Repository.csproj",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Repository.csproj",
+              "RelativeToolTip": "Repository\\Repository.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-01-20T19:02:31.583Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "RegisterDto.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\DTOs\\RegisterDto.cs",
+              "RelativeDocumentMoniker": "Service\\DTOs\\RegisterDto.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\DTOs\\RegisterDto.cs",
+              "RelativeToolTip": "Service\\DTOs\\RegisterDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:05:23.855Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "VerifyOtpDto.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\DTOs\\VerifyOtpDto.cs",
+              "RelativeDocumentMoniker": "Service\\DTOs\\VerifyOtpDto.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\DTOs\\VerifyOtpDto.cs",
+              "RelativeToolTip": "Service\\DTOs\\VerifyOtpDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:05:29.244Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "LoginDto.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\DTOs\\LoginDto.cs",
+              "RelativeDocumentMoniker": "Service\\DTOs\\LoginDto.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\DTOs\\LoginDto.cs",
+              "RelativeToolTip": "Service\\DTOs\\LoginDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:05:34.504Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "AuthResponseDto.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\DTOs\\AuthResponseDto.cs",
+              "RelativeDocumentMoniker": "Service\\DTOs\\AuthResponseDto.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\DTOs\\AuthResponseDto.cs",
+              "RelativeToolTip": "Service\\DTOs\\AuthResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:05:41.569Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "IAuthService.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Interface\\IAuthService.cs",
+              "RelativeDocumentMoniker": "Service\\Interface\\IAuthService.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Interface\\IAuthService.cs",
+              "RelativeToolTip": "Service\\Interface\\IAuthService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:06:02.015Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "IEmailService.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Interface\\IEmailService.cs",
+              "RelativeDocumentMoniker": "Service\\Interface\\IEmailService.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Interface\\IEmailService.cs",
+              "RelativeToolTip": "Service\\Interface\\IEmailService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:05:54.868Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "RefreshTokenDto.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\DTOs\\RefreshTokenDto.cs",
+              "RelativeDocumentMoniker": "Service\\DTOs\\RefreshTokenDto.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\DTOs\\RefreshTokenDto.cs",
+              "RelativeToolTip": "Service\\DTOs\\RefreshTokenDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:05:47.883Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Service.csproj",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Service.csproj",
+              "RelativeDocumentMoniker": "Service\\Service.csproj",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Service\\Service.csproj",
+              "RelativeToolTip": "Service\\Service.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-01-20T19:05:05.177Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "GenericRepository.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Implement\\GenericRepository.cs",
+              "RelativeDocumentMoniker": "Repository\\Implement\\GenericRepository.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Implement\\GenericRepository.cs",
+              "RelativeToolTip": "Repository\\Implement\\GenericRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:05:02.928Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "RefreshToken.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Model\\RefreshToken.cs",
+              "RelativeDocumentMoniker": "Repository\\Model\\RefreshToken.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Model\\RefreshToken.cs",
+              "RelativeToolTip": "Repository\\Model\\RefreshToken.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:03:51.927Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "OtpCode.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Model\\OtpCode.cs",
+              "RelativeDocumentMoniker": "Repository\\Model\\OtpCode.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Model\\OtpCode.cs",
+              "RelativeToolTip": "Repository\\Model\\OtpCode.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:03:56.716Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "IGenericRepository.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Interface\\IGenericRepository.cs",
+              "RelativeDocumentMoniker": "Repository\\Interface\\IGenericRepository.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Interface\\IGenericRepository.cs",
+              "RelativeToolTip": "Repository\\Interface\\IGenericRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:04:48.242Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "IUnitOfWork.cs",
+              "DocumentMoniker": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Interface\\IUnitOfWork.cs",
+              "RelativeDocumentMoniker": "Repository\\Interface\\IUnitOfWork.cs",
+              "ToolTip": "D:\\StudyMate_BE\\StudyMate_BE\\Repository\\Interface\\IUnitOfWork.cs",
+              "RelativeToolTip": "Repository\\Interface\\IUnitOfWork.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T19:04:55.312Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

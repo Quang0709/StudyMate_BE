@@ -1,0 +1,25 @@
+﻿{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=DESKTOP-EMS4P1Q\\SQLEXPRESS;Uid=sa;Pwd=12345;Database=StudyMate;TrustServerCertificate=True"
+  },
+  "JwtSettings": {
+    "SecretKey": "YourSuperSecretKeyThatIsAtLeast32CharactersLongForHS256Algorithm",
+    "Issuer": "StudyMateAPI",
+    "Audience": "StudyMateClient"
+  },
+  "EmailSettings": {
+    "FromEmail": "your-email@gmail.com",
+    "FromName": "StudyMate",
+    "SmtpServer": "smtp.gmail.com",
+    "SmtpPort": "587",
+    "Username": "your-email@gmail.com",
+    "Password": "your-app-password"
+  }
+}

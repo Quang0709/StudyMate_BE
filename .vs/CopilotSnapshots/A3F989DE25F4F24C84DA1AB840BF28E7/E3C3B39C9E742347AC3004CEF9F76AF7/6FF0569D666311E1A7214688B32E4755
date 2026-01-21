@@ -1,0 +1,191 @@
+﻿# Quick Start Guide - StudyMate Authentication
+
+## B??c 1: Chu?n b? Database (5 phút)
+
+1. M? SQL Server Management Studio
+2. K?t n?i ??n SQL Server instance c?a b?n
+3. Ch?y script t?o b?ng:
+
+```sql
+USE StudyMate;
+GO
+
+-- T?o b?ng refresh_tokens
+CREATE TABLE refresh_tokens (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    user_id INT NOT NULL,
+    token NVARCHAR(500) NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    is_revoked BIT DEFAULT 0,
+    CONSTRAINT FK_RefreshToken_User FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IX_RefreshTokens_Token ON refresh_tokens(token);
+CREATE INDEX IX_RefreshTokens_UserId ON refresh_tokens(user_id);
+
+-- T?o b?ng otp_codes
+CREATE TABLE otp_codes (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    email VARCHAR(255) NOT NULL,
+    code VARCHAR(6) NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    is_used BIT DEFAULT 0
+);
+
+CREATE INDEX IX_OtpCodes_Email ON otp_codes(email);
+CREATE INDEX IX_OtpCodes_Code ON otp_codes(code);
+```
+
+## B??c 2: C?u hình Gmail cho g?i OTP (10 phút)
+
+### T?o App Password trong Gmail:
+
+1. ??ng nh?p Gmail c?a b?n
+2. Truy c?p: https://myaccount.google.com/security
+3. B?t "2-Step Verification" (n?u ch?a b?t)
+4. Truy c?p: https://myaccount.google.com/apppasswords
+5. Ch?n app: "Mail", device: "Other" ? ??t tên "StudyMate"
+6. Click "Generate" ? Copy mã 16 ký t?
+
+### C?p nh?t appsettings.json:
+
+M? file `StudyMate_BE/appsettings.json` và c?p nh?t:
+
+```json
+"EmailSettings": {
+  "FromEmail": "your-email@gmail.com",      // ? Email c?a b?n
+  "FromName": "StudyMate",
+  "SmtpServer": "smtp.gmail.com",
+  "SmtpPort": "587",
+  "Username": "your-email@gmail.com",       // ? Email c?a b?n
+  "Password": "xxxx xxxx xxxx xxxx"         // ? App Password (16 ký t?)
+}
+```
+
+## B??c 3: Ch?y ?ng d?ng (2 phút)
+
+```bash
+cd StudyMate_BE
+dotnet restore
+dotnet run
+```
+
+?ng d?ng s? ch?y t?i: `https://localhost:5001`
+
+## B??c 4: Test API v?i Swagger (5 phút)
+
+1. M? browser: `https://localhost:5001/swagger`
+
+2. **Test Register:**
+   - Click `/api/auth/register`
+   - Click "Try it out"
+   - Paste:
+   ```json
+   {
+     "fullName": "Test User",
+     "email": "your-real-email@gmail.com",
+     "password": "Test123!",
+     "role": "student"
+   }
+   ```
+   - Click "Execute"
+   - Check email ?? l?y OTP
+
+3. **Test Verify OTP:**
+   - Click `/api/auth/verify-otp`
+   - Paste:
+   ```json
+   {
+     "email": "your-real-email@gmail.com",
+     "code": "123456"
+   }
+   ```
+   - Click "Execute"
+   - Copy `accessToken` t? response
+
+4. **Test Protected Endpoint:**
+   - Click nút "Authorize" ? ??u trang
+   - Nh?p: `Bearer {paste-access-token-here}`
+   - Click "Authorize"
+   - Th? g?i `/api/auth/me`
+
+## Lu?ng test nhanh:
+
+```
+1. Register (email th?t ?? nh?n OTP)
+   ?
+2. Check email ? l?y mã OTP
+   ?
+3. Verify OTP ? nh?n tokens
+   ?
+4. Login (optional - ?? test login)
+   ?
+5. Call /me (test protected endpoint)
+   ?
+6. Refresh token (sau 15 phút)
+   ?
+7. Logout
+```
+
+## Troubleshooting nhanh:
+
+### "Failed to send OTP email"
+- ? Check email settings trong appsettings.json
+- ? Dùng App Password, không dùng password Gmail th??ng
+- ? B?t "Less secure app access" (n?u không dùng App Password)
+
+### "Invalid email or password"
+- ? Password ph?i có ít nh?t 6 ký t?
+- ? Email ph?i ?úng format
+
+### "OTP has expired"
+- ? OTP ch? có hi?u l?c 10 phút
+- ? Register l?i ?? nh?n OTP m?i
+
+### "Email is already registered"
+- ? M?i email ch? ??ng ký 1 l?n
+- ? Dùng email khác ho?c xóa user trong database
+
+### Token không work
+- ? Check format: "Bearer {token}" (có d?u cách)
+- ? Token expire sau 15 phút, dùng refresh token
+
+## Ki?m tra Database:
+
+```sql
+-- Check users ?ã ??ng ký
+SELECT * FROM users;
+
+-- Check students/teachers
+SELECT * FROM students;
+SELECT * FROM teachers;
+
+-- Check OTP codes
+SELECT * FROM otp_codes ORDER BY created_at DESC;
+
+-- Check refresh tokens
+SELECT * FROM refresh_tokens WHERE is_revoked = 0;
+```
+
+## Production Checklist:
+
+- [ ] ??i JWT SecretKey thành key m?nh h?n
+- [ ] L?u secrets trong environment variables
+- [ ] Enable HTTPS
+- [ ] Configure CORS ?úng domain
+- [ ] Add rate limiting
+- [ ] Setup logging và monitoring
+- [ ] Backup database
+- [ ] Test v?i nhi?u users
+
+## Support:
+
+N?u g?p v?n ??:
+1. Check console logs
+2. Check SQL Server logs
+3. Check email settings
+4. ??c README_AUTH.md ?? bi?t chi ti?t
+
+Happy coding! ??

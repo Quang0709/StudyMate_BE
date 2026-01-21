@@ -1,0 +1,16 @@
+﻿{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "EmailSettings": {
+    "FromEmail": "quangnn7904@gmail.com",
+    "FromName": "StudyMate",
+    "SmtpServer": "smtp.gmail.com",
+    "SmtpPort": "587",
+    "Username": "quangnn7904@gmail.com",
+    "Password": "your-16-character-app-password-here"
+  }
+}

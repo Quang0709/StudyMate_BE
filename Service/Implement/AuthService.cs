@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Repository.Interface;
 using Repository.Model;
 using Service.DTOs;
-using Service.Helpers;
 using Service.Interface;
 
 namespace Service.Implement;
@@ -15,140 +14,33 @@ namespace Service.Implement;
 public class AuthService : IAuthService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IEmailService _emailService;
     private readonly ITokenService _tokenService;
 
-    public AuthService(IUnitOfWork unitOfWork, IEmailService emailService, ITokenService tokenService)
+    public AuthService(IUnitOfWork unitOfWork, ITokenService tokenService)
     {
         _unitOfWork = unitOfWork;
-        _emailService = emailService;
         _tokenService = tokenService;
     }
 
-    public async Task<(bool Success, string Message)> RegisterAsync(RegisterDto registerDto)
+    public async Task<(bool Success, string Message, AuthResponseDto? Data)> RegisterAsync(RegisterDto registerDto)
     {
         // Check if email already exists
         var existingUser = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Email == registerDto.Email);
         if (existingUser != null)
         {
-            return (false, "Email is already registered");
+            return (false, "Email is already registered", null);
         }
 
-        // Check if there's a pending OTP for this email (not expired and not used)
-        var existingOtp = await _unitOfWork.OtpCodes.FirstOrDefaultAsync(
-            o => o.Email == registerDto.Email && !o.IsUsed && o.ExpiryDate > DateTime.UtcNow
-        );
-
-        if (existingOtp != null)
-        {
-            return (false, "An OTP has already been sent to this email. Please check your inbox or wait for it to expire.");
-        }
-
-        // Store registration data temporarily
-        var pendingRegistration = new PendingRegistration
-        {
-            Email = registerDto.Email,
-            Password = registerDto.Password,
-            FullName = registerDto.FullName,
-            Role = registerDto.Role,
-            CreatedAt = DateTime.UtcNow
-        };
-        RegistrationCache.Add(registerDto.Email, pendingRegistration);
-
-        // Generate OTP
-        var otpCode = GenerateOtpCode();
-        
-        // Save OTP to database
-        var otp = new OtpCode
-        {
-            Email = registerDto.Email,
-            Code = otpCode,
-            ExpiryDate = DateTime.UtcNow.AddMinutes(10),
-            CreatedAt = DateTime.UtcNow,
-            IsUsed = false
-        };
-
-        await _unitOfWork.OtpCodes.AddAsync(otp);
-        await _unitOfWork.SaveChangesAsync();
-
-        // Send OTP via email
-        try
-        {
-            await _emailService.SendOtpEmailAsync(registerDto.Email, otpCode);
-        }
-        catch (Exception ex)
-        {
-            return (false, $"Failed to send OTP email: {ex.Message}");
-        }
-
-        return (true, "OTP has been sent to your email. Please verify to complete registration.");
-    }
-
-    public async Task<(bool Success, string Message, AuthResponseDto? Data)> VerifyOtpAndCompleteRegistrationAsync(VerifyOtpDto verifyOtpDto)
-    {
-        // Find OTP
-        var otp = await _unitOfWork.OtpCodes.FirstOrDefaultAsync(
-            o => o.Email == verifyOtpDto.Email && 
-                 o.Code == verifyOtpDto.Code && 
-                 !o.IsUsed
-        );
-
-        if (otp == null)
-        {
-            return (false, "Invalid OTP code", null);
-        }
-
-        if (otp.ExpiryDate < DateTime.UtcNow)
-        {
-            return (false, "OTP has expired", null);
-        }
-
-        // Check if user already exists
-        var existingUser = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Email == verifyOtpDto.Email);
-        if (existingUser != null)
-        {
-            return (false, "User already exists", null);
-        }
-
-        // Get registration data from cache
-        var pendingReg = RegistrationCache.Get(verifyOtpDto.Email);
-        if (pendingReg == null)
-        {
-            return (false, "Registration data expired. Please register again.", null);
-        }
-
-        // Mark OTP as used
-        otp.IsUsed = true;
-        _unitOfWork.OtpCodes.Update(otp);
-        await _unitOfWork.SaveChangesAsync();
-
-        // Complete registration
-        var result = await CompleteRegistrationAsync(
-            pendingReg.Email,
-            pendingReg.Password,
-            pendingReg.FullName,
-            pendingReg.Role
-        );
-
-        // Remove from cache
-        RegistrationCache.Remove(verifyOtpDto.Email);
-
-        return result;
-    }
-
-    private async Task<(bool Success, string Message, AuthResponseDto? Data)> CompleteRegistrationAsync(
-        string email, string password, string fullName, string role)
-    {
         // Hash password
-        var hashedPassword = HashPassword(password);
+        var hashedPassword = HashPassword(registerDto.Password);
 
         // Create user
         var user = new User
         {
-            Email = email,
+            Email = registerDto.Email,
             Password = hashedPassword,
-            FullName = fullName,
-            Role = role.ToLower(),
+            FullName = registerDto.FullName,
+            Role = registerDto.Role.ToLower(),
             IsBanned = false,
             CreatedAt = DateTime.UtcNow
         };
@@ -157,7 +49,7 @@ public class AuthService : IAuthService
         await _unitOfWork.SaveChangesAsync();
 
         // Create Student or Teacher profile
-        if (role.ToLower() == "student")
+        if (registerDto.Role.ToLower() == "student")
         {
             var student = new Student
             {
@@ -166,7 +58,7 @@ public class AuthService : IAuthService
             };
             await _unitOfWork.Students.AddAsync(student);
         }
-        else if (role.ToLower() == "teacher")
+        else if (registerDto.Role.ToLower() == "teacher")
         {
             var teacher = new Teacher
             {
@@ -333,6 +225,11 @@ public class AuthService : IAuthService
         return (true, "Logged out successfully");
     }
 
+    public async Task<UserDto?> GetUserByIdAsync(int userId)
+    {
+        return await GetUserDtoAsync(userId);
+    }
+
     private async Task<UserDto?> GetUserDtoAsync(int userId)
     {
         var user = await _unitOfWork.Users.GetByIdAsync(userId);
@@ -360,20 +257,16 @@ public class AuthService : IAuthService
         return userDto;
     }
 
-    private string GenerateOtpCode()
-    {
-        var random = new Random();
-        return random.Next(100000, 999999).ToString();
-    }
-
     private string GenerateStudentCode()
     {
-        return $"STU{DateTime.UtcNow:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
+        // Format: STU + yyMMddHHmm + random 3 digits = 3 + 10 + 3 = 16 characters
+        return $"STU{DateTime.UtcNow:yyMMddHHmm}{new Random().Next(100, 999)}";
     }
 
     private string GenerateTeacherCode()
     {
-        return $"TCH{DateTime.UtcNow:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
+        // Format: TCH + yyMMddHHmm + random 3 digits = 3 + 10 + 3 = 16 characters
+        return $"TCH{DateTime.UtcNow:yyMMddHHmm}{new Random().Next(100, 999)}";
     }
 
     private string HashPassword(string password)

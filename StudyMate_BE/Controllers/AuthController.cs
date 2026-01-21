@@ -28,28 +28,7 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var (success, message) = await _authService.RegisterAsync(registerDto);
-
-        if (!success)
-        {
-            return BadRequest(new { message });
-        }
-
-        return Ok(new { message });
-    }
-
-    /// <summary>
-    /// Verify OTP and complete registration
-    /// </summary>
-    [HttpPost("verify-otp")]
-    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpDto verifyOtpDto)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var (success, message, data) = await _authService.VerifyOtpAndCompleteRegistrationAsync(verifyOtpDto);
+        var (success, message, data) = await _authService.RegisterAsync(registerDto);
 
         if (!success)
         {
@@ -142,17 +121,26 @@ public class AuthController : ControllerBase
     /// </summary>
     [Authorize]
     [HttpGet("me")]
-    public IActionResult GetCurrentUser()
+    public async Task<IActionResult> GetCurrentUser()
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var email = User.FindFirst(ClaimTypes.Email)?.Value;
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+        {
+            return Unauthorized(new { message = "Invalid token" });
+        }
+
+        var user = await _authService.GetUserByIdAsync(userId);
+        
+        if (user == null)
+        {
+            return NotFound(new { message = "User not found" });
+        }
 
         return Ok(new
         {
-            userId,
-            email,
-            role
+            message = "User retrieved successfully",
+            data = user
         });
     }
 }

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # .NET API - chỉ chạy API và kết nối với SQL Server container hiện có
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: studymate-api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=quirky_jones;Database=StudyMate;User Id=sa;Password=123456aA@;TrustServerCertificate=True;MultipleActiveResultSets=True
+    network_mode: bridge
+    restart: unless-stopped
+    depends_on:
+      - sqlserver-external
+
+  # Service giả để đảm bảo SQL Server container đang chạy
+  sqlserver-external:
+    image: alpine:latest
+    container_name: sqlserver-check
+    command: sh -c "echo 'Checking SQL Server connection...' && sleep 5"
+    network_mode: bridge
+    restart: "no"

@@ -11,6 +11,7 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<Teacher> Teachers { get; }
     IGenericRepository<RefreshToken> RefreshTokens { get; }
     IGenericRepository<OtpCode> OtpCodes { get; }
+    IGenericRepository<EmailVerificationToken> EmailVerificationTokens { get; }
     IGenericRepository<Course> Courses { get; }
     IGenericRepository<Enrollment> Enrollments { get; }
     IGenericRepository<CourseRating> CourseRatings { get; }

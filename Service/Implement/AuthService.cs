@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Repository.Interface;
 using Repository.Model;
 using Service.DTOs;
@@ -15,32 +16,119 @@ public class AuthService : IAuthService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ITokenService _tokenService;
+    private readonly IEmailService _emailService;
+    private readonly IConfiguration _configuration;
 
-    public AuthService(IUnitOfWork unitOfWork, ITokenService tokenService)
+    public AuthService(IUnitOfWork unitOfWork, ITokenService tokenService, IEmailService emailService, IConfiguration configuration)
     {
         _unitOfWork = unitOfWork;
         _tokenService = tokenService;
+        _emailService = emailService;
+        _configuration = configuration;
     }
 
-    public async Task<(bool Success, string Message, AuthResponseDto? Data)> RegisterAsync(RegisterDto registerDto)
+    public async Task<(bool Success, string Message)> RegisterAsync(RegisterDto registerDto)
     {
         // Check if email already exists
         var existingUser = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Email == registerDto.Email);
         if (existingUser != null)
         {
-            return (false, "Email is already registered", null);
+            return (false, "Email is already registered");
         }
+
+        // Check if there's a pending verification for this email
+        var existingToken = await _unitOfWork.EmailVerificationTokens.FirstOrDefaultAsync(
+            t => t.Email == registerDto.Email && !t.IsVerified && t.ExpiryDate > DateTime.UtcNow
+        );
+
+        if (existingToken != null)
+        {
+            return (false, "A verification email has already been sent to this address. Please check your inbox.");
+        }
+
+        // Generate verification token
+        var verificationToken = Guid.NewGuid().ToString("N");
 
         // Hash password
         var hashedPassword = HashPassword(registerDto.Password);
 
+        // Save verification token to database
+        var emailVerification = new EmailVerificationToken
+        {
+            Email = registerDto.Email,
+            Token = verificationToken,
+            FullName = registerDto.FullName,
+            Password = hashedPassword,
+            Role = registerDto.Role.ToLower(),
+            ExpiryDate = DateTime.UtcNow.AddHours(24),
+            CreatedAt = DateTime.UtcNow,
+            IsVerified = false
+        };
+
+        await _unitOfWork.EmailVerificationTokens.AddAsync(emailVerification);
+        await _unitOfWork.SaveChangesAsync();
+
+        // Get base URL from configuration or request
+        var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "https://localhost:7259";
+        var verificationLink = $"{baseUrl}/api/Auth/verify-email?token={verificationToken}";
+
+        // Check if email sending is enabled
+        var enableEmailSending = bool.TryParse(_configuration["EmailSettings:EnableEmailSending"], out var enabled) && enabled;
+
+        if (enableEmailSending)
+        {
+            // Send verification email
+            try
+            {
+                await _emailService.SendVerificationEmailAsync(registerDto.Email, verificationLink);
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail registration
+                Console.WriteLine($"Failed to send email: {ex.Message}");
+                return (false, $"Failed to send verification email: {ex.Message}");
+            }
+            
+            return (true, "Registration successful! Please check your email to verify your account.");
+        }
+        else
+        {
+            // Email sending disabled - return verification link for testing
+            return (true, $"Registration successful! Use this link to verify: {verificationLink}");
+        }
+    }
+
+    public async Task<(bool Success, string Message, AuthResponseDto? Data)> VerifyEmailAsync(string token)
+    {
+        // Find verification token
+        var verificationToken = await _unitOfWork.EmailVerificationTokens.FirstOrDefaultAsync(
+            t => t.Token == token && !t.IsVerified
+        );
+
+        if (verificationToken == null)
+        {
+            return (false, "Invalid or already used verification token", null);
+        }
+
+        if (verificationToken.ExpiryDate < DateTime.UtcNow)
+        {
+            return (false, "Verification token has expired. Please register again.", null);
+        }
+
+        // Check if user already exists (in case of race condition)
+        var existingUser = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Email == verificationToken.Email);
+        if (existingUser != null)
+        {
+            return (false, "User already exists", null);
+        }
+
         // Create user
         var user = new User
         {
-            Email = registerDto.Email,
-            Password = hashedPassword,
-            FullName = registerDto.FullName,
-            Role = registerDto.Role.ToLower(),
+            Email = verificationToken.Email,
+            Password = verificationToken.Password,
+            FullName = verificationToken.FullName,
+            Role = verificationToken.Role,
             IsBanned = false,
             CreatedAt = DateTime.UtcNow
         };
@@ -49,7 +137,7 @@ public class AuthService : IAuthService
         await _unitOfWork.SaveChangesAsync();
 
         // Create Student or Teacher profile
-        if (registerDto.Role.ToLower() == "student")
+        if (verificationToken.Role == "student")
         {
             var student = new Student
             {
@@ -58,7 +146,7 @@ public class AuthService : IAuthService
             };
             await _unitOfWork.Students.AddAsync(student);
         }
-        else if (registerDto.Role.ToLower() == "teacher")
+        else if (verificationToken.Role == "teacher")
         {
             var teacher = new Teacher
             {
@@ -67,6 +155,10 @@ public class AuthService : IAuthService
             };
             await _unitOfWork.Teachers.AddAsync(teacher);
         }
+
+        // Mark token as verified
+        verificationToken.IsVerified = true;
+        _unitOfWork.EmailVerificationTokens.Update(verificationToken);
 
         await _unitOfWork.SaveChangesAsync();
 
@@ -98,7 +190,7 @@ public class AuthService : IAuthService
             User = userDto!
         };
 
-        return (true, "Registration completed successfully", authResponse);
+        return (true, "Email verified successfully! Your account has been created.", authResponse);
     }
 
     public async Task<(bool Success, string Message, AuthResponseDto? Data)> LoginAsync(LoginDto loginDto)

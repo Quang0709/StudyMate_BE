@@ -47,6 +47,30 @@ namespace StudyMate_BE
             })
             .AddJwtBearer(options =>
             {
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var authHeader = context.Request.Headers["Authorization"].ToString();
+                        
+                        if (!string.IsNullOrEmpty(authHeader))
+                        {
+                            // Accept token with or without "Bearer " prefix
+                            if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                            {
+                                context.Token = authHeader.Substring(7).Trim();
+                            }
+                            else
+                            {
+                                // Accept token without Bearer prefix
+                                context.Token = authHeader.Trim();
+                            }
+                        }
+                        
+                        return Task.CompletedTask;
+                    }
+                };
+                
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -92,7 +116,7 @@ namespace StudyMate_BE
                 // Add JWT Authentication to Swagger
                 c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
-                    Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+                    Description = "JWT Authorization header. You can enter just the token (without 'Bearer' prefix) or 'Bearer {token}'",
                     Name = "Authorization",
                     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
                     Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,

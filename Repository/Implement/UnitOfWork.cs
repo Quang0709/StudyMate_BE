@@ -15,6 +15,7 @@ public class UnitOfWork : IUnitOfWork
     private IGenericRepository<Teacher>? _teachers;
     private IGenericRepository<RefreshToken>? _refreshTokens;
     private IGenericRepository<OtpCode>? _otpCodes;
+    private IGenericRepository<EmailVerificationToken>? _emailVerificationTokens;
     private IGenericRepository<Course>? _courses;
     private IGenericRepository<Enrollment>? _enrollments;
     private IGenericRepository<CourseRating>? _courseRatings;
@@ -36,6 +37,7 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<Teacher> Teachers => _teachers ??= new GenericRepository<Teacher>(_context);
     public IGenericRepository<RefreshToken> RefreshTokens => _refreshTokens ??= new GenericRepository<RefreshToken>(_context);
     public IGenericRepository<OtpCode> OtpCodes => _otpCodes ??= new GenericRepository<OtpCode>(_context);
+    public IGenericRepository<EmailVerificationToken> EmailVerificationTokens => _emailVerificationTokens ??= new GenericRepository<EmailVerificationToken>(_context);
     public IGenericRepository<Course> Courses => _courses ??= new GenericRepository<Course>(_context);
     public IGenericRepository<Enrollment> Enrollments => _enrollments ??= new GenericRepository<Enrollment>(_context);
     public IGenericRepository<CourseRating> CourseRatings => _courseRatings ??= new GenericRepository<CourseRating>(_context);

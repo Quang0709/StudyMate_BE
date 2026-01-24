@@ -31,12 +31,11 @@ services:
       - "7259:7259" 
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
-      # Cổng 7259 phải để https mới khớp với chứng chỉ
       - ASPNETCORE_URLS=https://+:7259;http://+:8080
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=123456
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=StudyMate;User Id=sa;Password=123456aA@;TrustServerCertificate=True;MultipleActiveResultSets=True
-      - AppSettings__BaseUrl=https://localhost:7259
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=${CERT_PASSWORD}
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=${CERT_PATH}
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
+      - AppSettings__BaseUrl=${BASE_URL}
     volumes:
       # Lệnh này đưa file aspnetapp.pfx từ máy bạn vào container
       - .:/https:ro

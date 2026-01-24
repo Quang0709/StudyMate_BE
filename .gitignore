@@ -1,10 +1,8 @@
 ####################################
 # Visual Studio / .NET
 ####################################
-
 .vs/
 **/.vs/
-
 bin/
 obj/
 **/bin/
@@ -38,6 +36,18 @@ DocumentLayout.json
 ####################################
 .DS_Store
 Thumbs.db
+
+####################################
+# Environment & Secrets (Added)
+####################################
+# Chặn các file chứa biến môi trường nhạy cảm
+.env
+.env.local
+.env.*.local
+
+# Chặn file chứng chỉ HTTPS vừa tạo cho Docker
+*.pfx
+
 ####################################
 # App settings (local)
 ####################################

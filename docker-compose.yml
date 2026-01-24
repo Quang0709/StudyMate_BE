@@ -1,14 +1,13 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  # SQL Server Database
   sqlserver:
+    container_name: sqlserver
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: studymate-sqlserver
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=YourStrong@Password123
-      - MSSQL_PID=Developer
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "123456aA@"
+      MSSQL_PID: "Developer"
     ports:
       - "1433:1433"
     volumes:
@@ -16,24 +15,31 @@ services:
     networks:
       - studymate-network
     healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Password123 -Q "SELECT 1" || exit 1
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "123456aA@", "-Q", "SELECT 1", "-C"]
       interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
-  # .NET API
   api:
+    container_name: studymate_api
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: studymate-api
     ports:
       - "8080:8080"
+      - "7259:7259" 
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
-      - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=StudyMate;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True;MultipleActiveResultSets=True
+      # Cổng 7259 phải để https mới khớp với chứng chỉ
+      - ASPNETCORE_URLS=https://+:7259;http://+:8080
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=123456
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=StudyMate;User Id=sa;Password=123456aA@;TrustServerCertificate=True;MultipleActiveResultSets=True
+      - AppSettings__BaseUrl=https://localhost:7259
+    volumes:
+      # Lệnh này đưa file aspnetapp.pfx từ máy bạn vào container
+      - .:/https:ro
     depends_on:
       sqlserver:
         condition: service_healthy

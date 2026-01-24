@@ -408,4 +408,46 @@ public class AuthController : ControllerBase
             data = user
         });
     }
+
+    /// <summary>
+    /// Request password reset - sends OTP code to email
+    /// </summary>
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var (success, message) = await _authService.ForgotPasswordAsync(forgotPasswordDto);
+
+        if (!success)
+        {
+            return BadRequest(new { message });
+        }
+
+        return Ok(new { message });
+    }
+
+    /// <summary>
+    /// Reset password using OTP code
+    /// </summary>
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var (success, message) = await _authService.ResetPasswordAsync(resetPasswordDto);
+
+        if (!success)
+        {
+            return BadRequest(new { message });
+        }
+
+        return Ok(new { message });
+    }
 }

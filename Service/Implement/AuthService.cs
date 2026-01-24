@@ -373,4 +373,144 @@ public class AuthService : IAuthService
         var hashOfInput = HashPassword(password);
         return hashOfInput == hashedPassword;
     }
+
+    public async Task<(bool Success, string Message)> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
+    {
+        // Check if user exists
+        var user = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Email == forgotPasswordDto.Email);
+        if (user == null)
+        {
+            // Return success even if user doesn't exist to prevent email enumeration
+            return (true, "If the email exists in our system, a password reset code will be sent.");
+        }
+
+        if (user.IsBanned == true)
+        {
+            return (false, "Your account has been banned. Please contact support.");
+        }
+
+        // Check if there's a recent unused code (rate limiting - prevent spam)
+        var recentCode = await _unitOfWork.PasswordResetCodes.FirstOrDefaultAsync(
+            c => c.Email == forgotPasswordDto.Email && 
+                 !c.IsUsed && 
+                 c.CreatedAt > DateTime.UtcNow.AddMinutes(-2)
+        );
+
+        if (recentCode != null)
+        {
+            return (false, "A password reset code was recently sent. Please wait 2 minutes before requesting a new one.");
+        }
+
+        // Generate 6-digit OTP code
+        var otpCode = GenerateOtpCode();
+
+        // Save to database
+        var passwordResetCode = new PasswordResetCode
+        {
+            Email = forgotPasswordDto.Email,
+            Code = otpCode,
+            ExpiryDate = DateTime.UtcNow.AddMinutes(10),
+            CreatedAt = DateTime.UtcNow,
+            IsUsed = false,
+            AttemptCount = 0
+        };
+
+        await _unitOfWork.PasswordResetCodes.AddAsync(passwordResetCode);
+        await _unitOfWork.SaveChangesAsync();
+
+        // Check if email sending is enabled
+        var enableEmailSending = bool.TryParse(_configuration["EmailSettings:EnableEmailSending"], out var enabled) && enabled;
+
+        if (enableEmailSending)
+        {
+            try
+            {
+                await _emailService.SendPasswordResetOtpAsync(forgotPasswordDto.Email, otpCode);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send password reset email: {ex.Message}");
+                return (false, $"Failed to send password reset email: {ex.Message}");
+            }
+            
+            return (true, "Password reset code has been sent to your email.");
+        }
+        else
+        {
+            // Email sending disabled - return OTP code for testing
+            return (true, $"Password reset code (testing): {otpCode}");
+        }
+    }
+
+    public async Task<(bool Success, string Message)> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
+    {
+        // Find the password reset code
+        var resetCode = await _unitOfWork.PasswordResetCodes.FirstOrDefaultAsync(
+            c => c.Code == resetPasswordDto.OtpCode && !c.IsUsed
+        );
+
+        if (resetCode == null)
+        {
+            return (false, "Invalid or already used OTP code.");
+        }
+
+        // Check expiry
+        if (resetCode.ExpiryDate < DateTime.UtcNow)
+        {
+            return (false, "OTP code has expired. Please request a new one.");
+        }
+
+        // Check attempt count (max 5 attempts)
+        if (resetCode.AttemptCount >= 5)
+        {
+            resetCode.IsUsed = true;
+            _unitOfWork.PasswordResetCodes.Update(resetCode);
+            await _unitOfWork.SaveChangesAsync();
+            return (false, "Too many failed attempts. Please request a new code.");
+        }
+
+        // Find user
+        var user = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Email == resetCode.Email);
+        if (user == null)
+        {
+            return (false, "User not found.");
+        }
+
+        if (user.IsBanned == true)
+        {
+            return (false, "Your account has been banned. Please contact support.");
+        }
+
+        // Update password
+        user.Password = HashPassword(resetPasswordDto.NewPassword);
+        _unitOfWork.Users.Update(user);
+
+        // Mark code as used
+        resetCode.IsUsed = true;
+        _unitOfWork.PasswordResetCodes.Update(resetCode);
+
+        // Revoke all existing refresh tokens for security
+        var refreshTokens = await _unitOfWork.RefreshTokens.FindAsync(
+            rt => rt.UserId == user.Id && !rt.IsRevoked
+        );
+
+        foreach (var token in refreshTokens)
+        {
+            token.IsRevoked = true;
+            _unitOfWork.RefreshTokens.Update(token);
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+
+        return (true, "Password has been reset successfully. Please login with your new password.");
+    }
+
+    private string GenerateOtpCode()
+    {
+        using var rng = RandomNumberGenerator.Create();
+        var bytes = new byte[4];
+        rng.GetBytes(bytes);
+        var number = BitConverter.ToUInt32(bytes, 0) % 1000000;
+        return number.ToString("D6");
+    }
 }

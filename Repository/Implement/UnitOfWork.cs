@@ -26,6 +26,7 @@ public class UnitOfWork : IUnitOfWork
     private IGenericRepository<UserSubscription>? _userSubscriptions;
     private IGenericRepository<Flashcard>? _flashcards;
     private IGenericRepository<Quiz>? _quizzes;
+    private IGenericRepository<PasswordResetCode>? _passwordResetCodes;
 
     public UnitOfWork(StudyMateContext context)
     {
@@ -48,6 +49,7 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<UserSubscription> UserSubscriptions => _userSubscriptions ??= new GenericRepository<UserSubscription>(_context);
     public IGenericRepository<Flashcard> Flashcards => _flashcards ??= new GenericRepository<Flashcard>(_context);
     public IGenericRepository<Quiz> Quizzes => _quizzes ??= new GenericRepository<Quiz>(_context);
+    public IGenericRepository<PasswordResetCode> PasswordResetCodes => _passwordResetCodes ??= new GenericRepository<PasswordResetCode>(_context);
 
     public async Task<int> SaveChangesAsync()
     {

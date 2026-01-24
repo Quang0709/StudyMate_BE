@@ -38,3 +38,8 @@ DocumentLayout.json
 ####################################
 .DS_Store
 Thumbs.db
+####################################
+# App settings (local)
+####################################
+appsettings.Development.json
+**/appsettings.Development.json

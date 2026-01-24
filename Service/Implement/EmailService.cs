@@ -143,4 +143,70 @@ public class EmailService : IEmailService
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
     }
+
+    public async Task SendPasswordResetOtpAsync(string toEmail, string otpCode)
+    {
+        var emailSettings = _configuration.GetSection("EmailSettings");
+        var fromEmail = emailSettings["FromEmail"];
+        var fromName = emailSettings["FromName"];
+        var smtpServer = emailSettings["SmtpServer"];
+        var smtpPort = int.Parse(emailSettings["SmtpPort"]!);
+        var username = emailSettings["Username"];
+        var password = emailSettings["Password"];
+
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(fromName, fromEmail));
+        message.To.Add(new MailboxAddress(toEmail, toEmail));
+        message.Subject = "StudyMate - Password Reset Code";
+
+        var bodyBuilder = new BodyBuilder
+        {
+            HtmlBody = $@"
+                <html>
+                <body style='font-family: Arial, sans-serif;'>
+                    <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
+                        <div style='text-align: center; margin-bottom: 30px;'>
+                            <h1 style='color: #e74c3c; margin-bottom: 10px;'>Password Reset Request</h1>
+                            <p style='color: #666; font-size: 16px;'>You requested to reset your password</p>
+                        </div>
+                        
+                        <div style='background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 20px;'>
+                            <p style='margin: 0 0 15px 0; color: #333;'>
+                                Use the following code to reset your password:
+                            </p>
+                            
+                            <div style='background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px; margin: 20px 0; border-radius: 8px; color: #e74c3c;'>
+                                {otpCode}
+                            </div>
+                            
+                            <p style='margin: 15px 0 0 0; color: #666; font-size: 14px; text-align: center;'>
+                                This code will expire in <strong>10 minutes</strong>.
+                            </p>
+                        </div>
+                        
+                        <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107; margin-bottom: 20px;'>
+                            <p style='margin: 0; color: #856404; font-size: 14px;'>
+                                <strong>Security Warning:</strong> If you didn't request this password reset, please ignore this email or contact support if you have concerns.
+                            </p>
+                        </div>
+                        
+                        <div style='margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;'>
+                            <p style='color: #999; font-size: 12px; margin: 5px 0;'>
+                                This is an automated message, please do not reply.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            "
+        };
+
+        message.Body = bodyBuilder.ToMessageBody();
+
+        using var client = new SmtpClient();
+        await client.ConnectAsync(smtpServer, smtpPort, SecureSocketOptions.StartTls);
+        await client.AuthenticateAsync(username, password);
+        await client.SendAsync(message);
+        await client.DisconnectAsync(true);
+    }
 }

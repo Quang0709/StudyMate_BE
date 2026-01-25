@@ -23,7 +23,6 @@ namespace StudyMate_BE
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
                 sqlServerOptionsAction: sqlOptions =>
                 {
-                    // Docker SQL Server thường khởi động chậm, cần retry để API không bị sập ngay lập tức
                     sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 10,
                         maxRetryDelay: TimeSpan.FromSeconds(30),
@@ -113,7 +112,7 @@ namespace StudyMate_BE
                 }
             });
 
-            if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Docker")
+            if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c => {

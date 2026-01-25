@@ -2,7 +2,7 @@
 
 ## Default Admin Account
 
-Khi ?ng d?ng ch?y l?n ??u, h? th?ng t? ??ng t?o tài kho?n admin v?i credentials:
+Khi ?ng d?ng ch?y l?n ??u, h? th?ng t? ??ng t?o tï¿½i kho?n admin v?i credentials:
 
 ```
 Email: admin@studymate.com
@@ -10,7 +10,7 @@ Password: Admin@123456
 Role: admin
 ```
 
-## C?u hình Admin
+## C?u hï¿½nh Admin
 
 File: `StudyMate_BE/appsettings.json`
 
@@ -22,7 +22,7 @@ File: `StudyMate_BE/appsettings.json`
 }
 ```
 
-B?n có th? thay ??i email, password và full name tr??c khi ch?y ?ng d?ng l?n ??u.
+B?n cï¿½ th? thay ??i email, password vï¿½ full name tr??c khi ch?y ?ng d?ng l?n ??u.
 
 ## Login Admin
 
@@ -39,7 +39,7 @@ B?n có th? thay ??i email, password và full name tr??c khi ch?y ?ng d?ng l?n ??u
 ```
 5. Click "Execute"
 6. Copy `accessToken` t? response
-7. Click nút "Authorize" và paste: `Bearer {accessToken}`
+7. Click nï¿½t "Authorize" vï¿½ paste: `Bearer {accessToken}`
 
 ### S? d?ng cURL:
 ```bash
@@ -53,12 +53,12 @@ curl -X POST https://localhost:7259/api/auth/login \
 
 ## Admin Permissions
 
-Admin có toàn quy?n truy c?p t?t c? API endpoints:
+Admin cï¿½ toï¿½n quy?n truy c?p t?t c? API endpoints:
 - ? Xem t?t c? users
 - ? Ban/Unban users
 - ? Approve/Reject courses
-- ? Qu?n lý n?i dung
-- ? Xem th?ng kê
+- ? Qu?n lï¿½ n?i dung
+- ? Xem th?ng kï¿½
 
 ## Ki?m tra Admin trong Database
 
@@ -85,7 +85,7 @@ POST /api/auth/login
 
 ### B??c 2: ??i password trong database
 ```sql
--- T?o hash cho password m?i (ví d?: NewSecurePassword@2024)
+-- T?o hash cho password m?i (vï¿½ d?: NewSecurePassword@2024)
 -- Hash b?ng SHA256
 
 UPDATE users 
@@ -93,11 +93,11 @@ SET password = 'YourNewHashedPasswordHere'
 WHERE email = 'admin@studymate.com';
 ```
 
-**Ho?c** t?o API endpoint riêng cho change password (recommended).
+**Ho?c** t?o API endpoint riï¿½ng cho change password (recommended).
 
 ## T?o Admin m?i
 
-### Cách 1: Thêm tr?c ti?p vào database
+### Cï¿½ch 1: Thï¿½m tr?c ti?p vï¿½o database
 ```sql
 -- Hash password tr??c (SHA256)
 INSERT INTO users (email, password, full_name, role, is_banned, created_at)
@@ -111,7 +111,7 @@ VALUES (
 );
 ```
 
-### Cách 2: Thêm vào appsettings và restart app
+### Cï¿½ch 2: Thï¿½m vï¿½o appsettings vï¿½ restart app
 ```json
 "AdditionalAdmins": [
   {
@@ -122,7 +122,7 @@ VALUES (
 ]
 ```
 
-## Xóa/Disable Admin
+## Xï¿½a/Disable Admin
 
 ### Disable (Ban):
 ```sql
@@ -131,14 +131,14 @@ SET is_banned = 1
 WHERE email = 'admin@studymate.com';
 ```
 
-### Xóa hoàn toàn:
+### Xï¿½a hoï¿½n toï¿½n:
 ```sql
--- Xóa refresh tokens tr??c
+-- Xï¿½a refresh tokens tr??c
 DELETE FROM refresh_tokens WHERE user_id = (
   SELECT id FROM users WHERE email = 'admin@studymate.com'
 );
 
--- Xóa user
+-- Xï¿½a user
 DELETE FROM users WHERE email = 'admin@studymate.com';
 ```
 
@@ -146,15 +146,15 @@ DELETE FROM users WHERE email = 'admin@studymate.com';
 
 ### Development:
 - ? S? d?ng admin default ?? test
-- ? Không commit appsettings.json v?i password th?t
+- ? Khï¿½ng commit appsettings.json v?i password th?t
 
 ### Production:
 - ?? **??I PASSWORD NGAY** sau deploy l?n ??u
-- ?? S? d?ng Environment Variables thay vì appsettings.json
-- ?? Enable 2FA cho admin (n?u có)
+- ?? S? d?ng Environment Variables thay vï¿½ appsettings.json
+- ?? Enable 2FA cho admin (n?u cï¿½)
 - ?? Log t?t c? admin actions
 - ?? Gi?i h?n IP access cho admin
-- ?? S? d?ng password m?nh (>= 12 ký t?, có ký t? ??c bi?t)
+- ?? S? d?ng password m?nh (>= 12 kï¿½ t?, cï¿½ kï¿½ t? ??c bi?t)
 
 ### Environment Variables (Production):
 ```bash
@@ -165,16 +165,11 @@ export DefaultAdmin__Password="YourSecurePassword"
 # Windows PowerShell
 $env:DefaultAdmin__Email="admin@studymate.com"
 $env:DefaultAdmin__Password="YourSecurePassword"
-
-# Docker
-docker run -e DefaultAdmin__Email=admin@studymate.com \
-           -e DefaultAdmin__Password=YourSecurePassword \
-           studymate-api
 ```
 
 ## Troubleshooting
 
-### Admin không ???c t?o
+### Admin khï¿½ng ???c t?o
 **Ki?m tra:**
 1. Check console logs khi start app:
 ```
@@ -189,17 +184,17 @@ SELECT * FROM users WHERE role = 'admin';
 
 3. N?u l?i:
 ```sql
--- Xóa admin c? và restart app
+-- Xï¿½a admin c? vï¿½ restart app
 DELETE FROM users WHERE email = 'admin@studymate.com';
 ```
 
 ### Admin login failed
-**Nguyên nhân:**
+**Nguyï¿½n nhï¿½n:**
 - Email/password sai
 - Account b? ban
 - Token configuration sai
 
-**Gi?i pháp:**
+**Gi?i phï¿½p:**
 ```sql
 -- Check admin status
 SELECT email, role, is_banned FROM users WHERE email = 'admin@studymate.com';

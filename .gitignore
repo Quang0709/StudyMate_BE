@@ -45,9 +45,6 @@ Thumbs.db
 .env.local
 .env.*.local
 
-# Chặn file chứng chỉ HTTPS vừa tạo cho Docker
-*.pfx
-
 ####################################
 # App settings (local)
 ####################################

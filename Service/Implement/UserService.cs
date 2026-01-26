@@ -34,8 +34,18 @@ public class UserService : IUserService
                 if (dto.FullName != null)
                     user.FullName = dto.FullName;
 
-                if (dto.Email != null)
-                    user.Email = dto.Email;
+
+        if (!string.IsNullOrWhiteSpace(dto.Email))
+        {
+            var email = dto.Email.Trim().ToLower();
+
+            if (!email.EndsWith("@gmail.com"))
+            {
+                throw new ArgumentException("Email must end with @gmail.com");
+            }
+
+            user.Email = email;
+        }
         /*
                        if (dto.PhoneNumber != null)
                            user.PhoneNumber = dto.PhoneNumber;

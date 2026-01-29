@@ -389,7 +389,6 @@ public partial class StudyMateContext : DbContext
             entity.HasIndex(e => e.TeacherIdCode, "UQ__teachers__6E31A32DBB74B00C").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Bio).HasColumnName("bio");
             entity.Property(e => e.TeacherIdCode)
                 .HasMaxLength(20)
                 .IsUnicode(false)
@@ -459,6 +458,17 @@ public partial class StudyMateContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("role");
+            entity.Property(e => e.Birthday)
+                .HasColumnType("date")
+                .HasColumnName("birthday");
+            entity.Property(e => e.Bio)
+                .HasColumnName("bio");
+            entity.Property(e => e.AvatarUrl)
+                .HasMaxLength(500)
+                .HasColumnName("avatar_url");
+            entity.Property(e => e.Address)
+                .HasMaxLength(500)
+                .HasColumnName("address");
         });
 
         modelBuilder.Entity<UserSubscription>(entity =>

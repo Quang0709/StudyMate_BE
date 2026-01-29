@@ -17,6 +17,14 @@ public partial class User
 
     public bool? IsBanned { get; set; }
 
+    public DateTime? Birthday { get; set; }
+
+    public string? Bio { get; set; }
+
+    public string? AvatarUrl { get; set; }
+
+    public string? Address { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();

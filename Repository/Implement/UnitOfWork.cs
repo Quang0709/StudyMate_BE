@@ -26,6 +26,10 @@ public class UnitOfWork : IUnitOfWork
     private IGenericRepository<UserSubscription>? _userSubscriptions;
     private IGenericRepository<Flashcard>? _flashcards;
     private IGenericRepository<Quiz>? _quizzes;
+    private IGenericRepository<QuizQuestion>? _quizQuestions;
+    private IGenericRepository<QuizOption>? _quizOptions;
+    private IGenericRepository<CourseSection>? _courseSections;
+    private IGenericRepository<SectionMaterial>? _sectionMaterials;
     private IGenericRepository<PasswordResetCode>? _passwordResetCodes;
 
     public UnitOfWork(StudyMateContext context)
@@ -49,6 +53,10 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<UserSubscription> UserSubscriptions => _userSubscriptions ??= new GenericRepository<UserSubscription>(_context);
     public IGenericRepository<Flashcard> Flashcards => _flashcards ??= new GenericRepository<Flashcard>(_context);
     public IGenericRepository<Quiz> Quizzes => _quizzes ??= new GenericRepository<Quiz>(_context);
+    public IGenericRepository<QuizQuestion> QuizQuestions => _quizQuestions ??= new GenericRepository<QuizQuestion>(_context);
+    public IGenericRepository<QuizOption> QuizOptions => _quizOptions ??= new GenericRepository<QuizOption>(_context);
+    public IGenericRepository<CourseSection> CourseSections => _courseSections ??= new GenericRepository<CourseSection>(_context);
+    public IGenericRepository<SectionMaterial> SectionMaterials => _sectionMaterials ??= new GenericRepository<SectionMaterial>(_context);
     public IGenericRepository<PasswordResetCode> PasswordResetCodes => _passwordResetCodes ??= new GenericRepository<PasswordResetCode>(_context);
 
     public async Task<int> SaveChangesAsync()

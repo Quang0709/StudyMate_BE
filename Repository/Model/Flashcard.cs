@@ -1,8 +1,6 @@
-﻿using Repository.Model;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
-namespace Repository;
+namespace Repository.Model;
 
 public partial class Flashcard
 {
@@ -10,7 +8,9 @@ public partial class Flashcard
 
     public int CourseId { get; set; }
 
-    public string? Content { get; set; }
+    public string Front { get; set; } = null!; // Front of the flashcard
+
+    public string Back { get; set; } = null!; // Back of the flashcard (definition/answer)
 
     public virtual Course Course { get; set; } = null!;
 }

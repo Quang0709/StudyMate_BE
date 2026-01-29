@@ -22,6 +22,10 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<UserSubscription> UserSubscriptions { get; }
     IGenericRepository<Flashcard> Flashcards { get; }
     IGenericRepository<Quiz> Quizzes { get; }
+    IGenericRepository<QuizQuestion> QuizQuestions { get; }
+    IGenericRepository<QuizOption> QuizOptions { get; }
+    IGenericRepository<CourseSection> CourseSections { get; }
+    IGenericRepository<SectionMaterial> SectionMaterials { get; }
     IGenericRepository<PasswordResetCode> PasswordResetCodes { get; }
     
     Task<int> SaveChangesAsync();

@@ -29,26 +29,23 @@ public class UserService : IUserService
         var user = await _unitOfWork.Users.GetByIdAsync(userId);
         if (user == null) return false;
 
+        if (!string.IsNullOrWhiteSpace(dto.FullName))
+            user.FullName = dto.FullName;
 
-       
-                if (dto.FullName != null)
-                    user.FullName = dto.FullName;
+        if (!string.IsNullOrWhiteSpace(dto.Email))
+            user.Email = dto.Email;
 
-                if (dto.Email != null)
-                    user.Email = dto.Email;
-        /*
-                       if (dto.PhoneNumber != null)
-                           user.PhoneNumber = dto.PhoneNumber;
+        if (dto.Birthday.HasValue)
+            user.Birthday = dto.Birthday;
 
-                       if (dto.AvatarUrl != null)
-                           user.AvatarUrl = dto.AvatarUrl;
+        if (dto.Bio != null)
+            user.Bio = dto.Bio;
 
-                       if (dto.Address != null)
-                           user.Address = dto.Address;
+        if (!string.IsNullOrWhiteSpace(dto.AvatarUrl))
+            user.AvatarUrl = dto.AvatarUrl;
 
-                       if (dto.DateOfBirth.HasValue)
-                           user.DateOfBirth = dto.DateOfBirth;
-               */
+        if (!string.IsNullOrWhiteSpace(dto.Address))
+            user.Address = dto.Address;
 
         await _unitOfWork.SaveChangesAsync();
         return true;

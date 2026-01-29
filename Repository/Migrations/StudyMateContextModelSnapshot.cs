@@ -798,10 +798,6 @@ namespace Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Bio")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("bio");
-
                     b.Property<string>("TeacherIdCode")
                         .HasMaxLength(20)
                         .IsUnicode(false)
@@ -878,6 +874,24 @@ namespace Repository.Migrations
                         .HasColumnName("id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("address");
+
+                    b.Property<string>("AvatarUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("avatar_url");
+
+                    b.Property<string>("Bio")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("bio");
+
+                    b.Property<DateTime?>("Birthday")
+                        .HasColumnType("date")
+                        .HasColumnName("birthday");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()

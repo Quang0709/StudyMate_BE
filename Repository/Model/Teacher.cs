@@ -11,8 +11,6 @@ public partial class Teacher
 
     public string? TeacherIdCode { get; set; }
 
-    public string? Bio { get; set; }
-
     public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
 
     public virtual User User { get; set; } = null!;

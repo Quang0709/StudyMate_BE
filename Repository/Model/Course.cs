@@ -21,7 +21,13 @@ public partial class Course
 
     public string? RejectReason { get; set; }
 
+    public bool IsDeleted { get; set; }
+
     public DateTime? CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
 
     public virtual ICollection<CourseRating> CourseRatings { get; set; } = new List<CourseRating>();
 

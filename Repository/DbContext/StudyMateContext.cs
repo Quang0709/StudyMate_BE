@@ -112,6 +112,12 @@ public partial class StudyMateContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.DeletedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("deleted_at");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.Price)
                 .HasDefaultValue(0m)
@@ -123,6 +129,9 @@ public partial class StudyMateContext : DbContext
                 .IsUnicode(false)
                 .HasDefaultValue("pending")
                 .HasColumnName("status");
+            entity.Property(e => e.IsDeleted)
+                .HasDefaultValue(false)
+                .HasColumnName("is_deleted");
             entity.Property(e => e.TeacherId).HasColumnName("teacher_id");
             entity.Property(e => e.Title)
                 .HasMaxLength(255)

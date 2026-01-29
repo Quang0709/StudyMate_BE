@@ -22,7 +22,7 @@ namespace Repository.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Repository.Flashcard", b =>
+            modelBuilder.Entity("Repository.Model.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -31,20 +31,20 @@ namespace Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Content")
+                    b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("content");
+                        .HasColumnName("description");
 
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int")
-                        .HasColumnName("course_id");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id")
-                        .HasName("PK__flashcar__3213E83FF5A50661");
+                        .HasName("PK__categories");
 
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("flashcards", (string)null);
+                    b.ToTable("categories", (string)null);
                 });
 
             modelBuilder.Entity("Repository.Model.Comment", b =>
@@ -93,6 +93,10 @@ namespace Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int")
+                        .HasColumnName("category_id");
+
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -133,6 +137,8 @@ namespace Repository.Migrations
 
                     b.HasKey("Id")
                         .HasName("PK__courses__3213E83FB605C482");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("TeacherId");
 
@@ -178,6 +184,47 @@ namespace Repository.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("course_ratings", (string)null);
+                });
+
+            modelBuilder.Entity("Repository.Model.CourseSection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int")
+                        .HasColumnName("course_id");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int")
+                        .HasColumnName("order_index");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id")
+                        .HasName("PK__course_sections");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("course_sections", (string)null);
                 });
 
             modelBuilder.Entity("Repository.Model.EmailVerificationToken", b =>
@@ -274,6 +321,37 @@ namespace Repository.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("enrollments", (string)null);
+                });
+
+            modelBuilder.Entity("Repository.Model.Flashcard", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Back")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("back");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int")
+                        .HasColumnName("course_id");
+
+                    b.Property<string>("Front")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("front");
+
+                    b.HasKey("Id")
+                        .HasName("PK__flashcar__3213E83FF5A50661");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("flashcards", (string)null);
                 });
 
             modelBuilder.Entity("Repository.Model.OtpCode", b =>
@@ -500,6 +578,77 @@ namespace Repository.Migrations
                     b.ToTable("quizzes", (string)null);
                 });
 
+            modelBuilder.Entity("Repository.Model.QuizOption", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsCorrect")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_correct");
+
+                    b.Property<string>("OptionText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("option_text");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int")
+                        .HasColumnName("question_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK__quiz_options");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("quiz_options", (string)null);
+                });
+
+            modelBuilder.Entity("Repository.Model.QuizQuestion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("QuestionText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("question_text");
+
+                    b.Property<string>("QuestionType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("question_type");
+
+                    b.Property<int>("QuizId")
+                        .HasColumnType("int")
+                        .HasColumnName("quiz_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK__quiz_questions");
+
+                    b.HasIndex("QuizId");
+
+                    b.ToTable("quiz_questions", (string)null);
+                });
+
             modelBuilder.Entity("Repository.Model.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -540,6 +689,68 @@ namespace Repository.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("refresh_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("Repository.Model.SectionMaterial", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("FileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("file_name");
+
+                    b.Property<long?>("FileSize")
+                        .HasColumnType("bigint")
+                        .HasColumnName("file_size");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("file_url");
+
+                    b.Property<string>("MaterialType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("material_type");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int")
+                        .HasColumnName("order_index");
+
+                    b.Property<int>("SectionId")
+                        .HasColumnType("int")
+                        .HasColumnName("section_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id")
+                        .HasName("PK__section_materials");
+
+                    b.HasIndex("SectionId");
+
+                    b.ToTable("section_materials", (string)null);
                 });
 
             modelBuilder.Entity("Repository.Model.Student", b =>
@@ -753,18 +964,6 @@ namespace Repository.Migrations
                     b.ToTable("user_subscriptions", (string)null);
                 });
 
-            modelBuilder.Entity("Repository.Flashcard", b =>
-                {
-                    b.HasOne("Repository.Model.Course", "Course")
-                        .WithMany("Flashcards")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_Flashcard_Course");
-
-                    b.Navigation("Course");
-                });
-
             modelBuilder.Entity("Repository.Model.Comment", b =>
                 {
                     b.HasOne("Repository.Model.User", "Author")
@@ -787,11 +986,19 @@ namespace Repository.Migrations
 
             modelBuilder.Entity("Repository.Model.Course", b =>
                 {
+                    b.HasOne("Repository.Model.Category", "Category")
+                        .WithMany("Courses")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Course_Category");
+
                     b.HasOne("Repository.Model.Teacher", "Teacher")
                         .WithMany("Courses")
                         .HasForeignKey("TeacherId")
                         .IsRequired()
                         .HasConstraintName("FK_Course_Teacher");
+
+                    b.Navigation("Category");
 
                     b.Navigation("Teacher");
                 });
@@ -815,6 +1022,18 @@ namespace Repository.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("Repository.Model.CourseSection", b =>
+                {
+                    b.HasOne("Repository.Model.Course", "Course")
+                        .WithMany("CourseSections")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_CourseSection_Course");
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("Repository.Model.Enrollment", b =>
                 {
                     b.HasOne("Repository.Model.Course", "Course")
@@ -832,6 +1051,18 @@ namespace Repository.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Repository.Model.Flashcard", b =>
+                {
+                    b.HasOne("Repository.Model.Course", "Course")
+                        .WithMany("Flashcards")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Flashcard_Course");
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Repository.Model.Post", b =>
@@ -857,6 +1088,30 @@ namespace Repository.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("Repository.Model.QuizOption", b =>
+                {
+                    b.HasOne("Repository.Model.QuizQuestion", "Question")
+                        .WithMany("QuizOptions")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_QuizOption_QuizQuestion");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("Repository.Model.QuizQuestion", b =>
+                {
+                    b.HasOne("Repository.Model.Quiz", "Quiz")
+                        .WithMany("QuizQuestions")
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_QuizQuestion_Quiz");
+
+                    b.Navigation("Quiz");
+                });
+
             modelBuilder.Entity("Repository.Model.RefreshToken", b =>
                 {
                     b.HasOne("Repository.Model.User", "User")
@@ -867,6 +1122,18 @@ namespace Repository.Migrations
                         .HasConstraintName("FK_RefreshToken_User");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Repository.Model.SectionMaterial", b =>
+                {
+                    b.HasOne("Repository.Model.CourseSection", "Section")
+                        .WithMany("SectionMaterials")
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_SectionMaterial_CourseSection");
+
+                    b.Navigation("Section");
                 });
 
             modelBuilder.Entity("Repository.Model.Student", b =>
@@ -923,15 +1190,27 @@ namespace Repository.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("Repository.Model.Category", b =>
+                {
+                    b.Navigation("Courses");
+                });
+
             modelBuilder.Entity("Repository.Model.Course", b =>
                 {
                     b.Navigation("CourseRatings");
+
+                    b.Navigation("CourseSections");
 
                     b.Navigation("Enrollments");
 
                     b.Navigation("Flashcards");
 
                     b.Navigation("Quizzes");
+                });
+
+            modelBuilder.Entity("Repository.Model.CourseSection", b =>
+                {
+                    b.Navigation("SectionMaterials");
                 });
 
             modelBuilder.Entity("Repository.Model.Post", b =>
@@ -942,6 +1221,16 @@ namespace Repository.Migrations
             modelBuilder.Entity("Repository.Model.PremiumPlan", b =>
                 {
                     b.Navigation("UserSubscriptions");
+                });
+
+            modelBuilder.Entity("Repository.Model.Quiz", b =>
+                {
+                    b.Navigation("QuizQuestions");
+                });
+
+            modelBuilder.Entity("Repository.Model.QuizQuestion", b =>
+                {
+                    b.Navigation("QuizOptions");
                 });
 
             modelBuilder.Entity("Repository.Model.Student", b =>

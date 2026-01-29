@@ -22,6 +22,31 @@ namespace Repository.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Repository.Model.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("PK__categories");
+
+                    b.ToTable("categories", (string)null);
+                });
+
             modelBuilder.Entity("Repository.Model.Comment", b =>
                 {
                     b.Property<int>("Id")
@@ -68,6 +93,10 @@ namespace Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int")
+                        .HasColumnName("category_id");
+
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -108,6 +137,8 @@ namespace Repository.Migrations
 
                     b.HasKey("Id")
                         .HasName("PK__courses__3213E83FB605C482");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("TeacherId");
 
@@ -955,11 +986,19 @@ namespace Repository.Migrations
 
             modelBuilder.Entity("Repository.Model.Course", b =>
                 {
+                    b.HasOne("Repository.Model.Category", "Category")
+                        .WithMany("Courses")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Course_Category");
+
                     b.HasOne("Repository.Model.Teacher", "Teacher")
                         .WithMany("Courses")
                         .HasForeignKey("TeacherId")
                         .IsRequired()
                         .HasConstraintName("FK_Course_Teacher");
+
+                    b.Navigation("Category");
 
                     b.Navigation("Teacher");
                 });
@@ -1149,6 +1188,11 @@ namespace Repository.Migrations
                     b.Navigation("Plan");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Repository.Model.Category", b =>
+                {
+                    b.Navigation("Courses");
                 });
 
             modelBuilder.Entity("Repository.Model.Course", b =>

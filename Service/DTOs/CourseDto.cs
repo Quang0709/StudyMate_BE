@@ -15,9 +15,7 @@ public class CreateCourseDto
     [Range(0, double.MaxValue, ErrorMessage = "Price must be a positive number")]
     public decimal? Price { get; set; }
 
-    public string? Category { get; set; }
-
-    public string? Level { get; set; }
+    public int? CategoryId { get; set; }
 
     public List<CreateCourseSectionDto>? Sections { get; set; }
 

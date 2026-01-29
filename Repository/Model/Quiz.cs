@@ -12,4 +12,6 @@ public partial class Quiz
     public string? Title { get; set; }
 
     public virtual Course Course { get; set; } = null!;
+
+    public virtual ICollection<QuizQuestion> QuizQuestions { get; set; } = new List<QuizQuestion>();
 }

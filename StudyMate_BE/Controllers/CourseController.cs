@@ -92,7 +92,7 @@ public class CourseController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        // Get teacher ID from claims
+        // Get user ID from JWT claims
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value;
 
@@ -106,8 +106,6 @@ public class CourseController : ControllerBase
             return Forbid();
         }
 
-        // Note: We need to get the teacher ID from the user ID
-        // For now, assuming teacher ID equals user ID (adjust based on your logic)
         var (success, message, data) = await _courseService.CreateCourseAsync(userId, createCourseDto);
 
         if (!success)

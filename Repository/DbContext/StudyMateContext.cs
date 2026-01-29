@@ -20,6 +20,8 @@ public partial class StudyMateContext : DbContext
 
     public virtual DbSet<Course> Courses { get; set; }
 
+    public virtual DbSet<Category> Categories { get; set; }
+
     public virtual DbSet<CourseRating> CourseRatings { get; set; }
 
     public virtual DbSet<Enrollment> Enrollments { get; set; }
@@ -85,6 +87,19 @@ public partial class StudyMateContext : DbContext
                 .HasConstraintName("FK_Comment_Post");
         });
 
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__categories");
+
+            entity.ToTable("categories");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
+            entity.Property(e => e.Description).HasColumnName("description");
+        });
+
         modelBuilder.Entity<Course>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__courses__3213E83FB605C482");
@@ -92,6 +107,7 @@ public partial class StudyMateContext : DbContext
             entity.ToTable("courses");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -116,6 +132,11 @@ public partial class StudyMateContext : DbContext
                 .HasForeignKey(d => d.TeacherId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Course_Teacher");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.Courses)
+                .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Course_Category");
         });
 
         modelBuilder.Entity<CourseRating>(entity =>

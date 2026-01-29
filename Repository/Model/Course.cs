@@ -9,6 +9,8 @@ public partial class Course
 
     public int TeacherId { get; set; }
 
+    public int? CategoryId { get; set; }
+
     public string Title { get; set; } = null!;
 
     public string? Description { get; set; }
@@ -30,6 +32,8 @@ public partial class Course
     public virtual ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
 
     public virtual ICollection<CourseSection> CourseSections { get; set; } = new List<CourseSection>();
+
+    public virtual Category? Category { get; set; }
 
     public virtual Teacher Teacher { get; set; } = null!;
 }

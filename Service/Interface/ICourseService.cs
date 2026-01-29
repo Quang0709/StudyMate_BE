@@ -5,5 +5,5 @@ namespace Service.Interface;
 
 public interface ICourseService
 {
-    Task<(bool Success, string Message, object? Data)> CreateCourseAsync(int teacherId, CreateCourseDto createCourseDto);
+    Task<(bool Success, string Message, object? Data)> CreateCourseAsync(int userId, CreateCourseDto createCourseDto);
 }

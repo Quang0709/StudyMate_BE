@@ -17,15 +17,17 @@ public class CourseService : ICourseService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<(bool Success, string Message, object? Data)> CreateCourseAsync(int teacherId, CreateCourseDto createCourseDto)
+    public async Task<(bool Success, string Message, object? Data)> CreateCourseAsync(int userId, CreateCourseDto createCourseDto)
     {
         try
         {
-            // Validate teacher exists
-            var teacher = await _unitOfWork.Teachers.GetByIdAsync(teacherId);
+            // Get teacher record from user ID
+            var teachers = await _unitOfWork.Teachers.GetAllAsync();
+            var teacher = teachers.FirstOrDefault(t => t.UserId == userId);
+            
             if (teacher == null)
             {
-                return (false, "Teacher not found", null);
+                return (false, "Teacher profile not found for this user", null);
             }
 
             // Validate quiz limits
@@ -55,13 +57,24 @@ public class CourseService : ICourseService
                 return (false, "Course cannot have more than 50 flashcards", null);
             }
 
+            // Validate category if provided
+            if (createCourseDto.CategoryId.HasValue)
+            {
+                var category = await _unitOfWork.Categories.GetByIdAsync(createCourseDto.CategoryId.Value);
+                if (category == null)
+                {
+                    return (false, $"Category with ID {createCourseDto.CategoryId.Value} not found", null);
+                }
+            }
+
             // Create course
             var course = new Course
             {
-                TeacherId = teacherId,
+                TeacherId = teacher.Id, // Use teacher.Id instead of userId
                 Title = createCourseDto.Title,
                 Description = createCourseDto.Description,
                 Price = createCourseDto.Price ?? 0,
+                CategoryId = createCourseDto.CategoryId,
                 Status = "pending",
                 CreatedAt = DateTime.UtcNow
             };

@@ -9,6 +9,7 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<User> Users { get; }
     IGenericRepository<Student> Students { get; }
     IGenericRepository<Teacher> Teachers { get; }
+    IGenericRepository<Category> Categories { get; }
     IGenericRepository<RefreshToken> RefreshTokens { get; }
     IGenericRepository<OtpCode> OtpCodes { get; }
     IGenericRepository<EmailVerificationToken> EmailVerificationTokens { get; }

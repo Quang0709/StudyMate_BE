@@ -76,6 +76,7 @@ public class CourseService : ICourseService
                 Price = createCourseDto.Price ?? 0,
                 CategoryId = createCourseDto.CategoryId,
                 Status = "pending",
+                IsDeleted = false,
                 CreatedAt = DateTime.UtcNow
             };
 

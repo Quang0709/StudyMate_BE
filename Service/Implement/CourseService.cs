@@ -3,6 +3,7 @@ using Repository.Model;
 using Service.DTOs;
 using Service.Interface;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -201,6 +202,285 @@ public class CourseService : ICourseService
         catch (Exception ex)
         {
             return (false, $"Error creating course: {ex.Message}", null);
+        }
+    }
+
+    public async Task<(bool Success, string Message, List<CourseResponseDto>? Data)> GetMyCoursesAsync(int userId)
+    {
+        try
+        {
+            // Get teacher record from user ID
+            var teachers = await _unitOfWork.Teachers.GetAllAsync();
+            var teacher = teachers.FirstOrDefault(t => t.UserId == userId);
+            
+            if (teacher == null)
+            {
+                return (false, "Teacher profile not found for this user", null);
+            }
+
+            // Get all courses by teacher (ALWAYS exclude soft-deleted courses)
+            var allCourses = await _unitOfWork.Courses.GetAllAsync();
+            var teacherCourses = allCourses
+                .Where(c => c.TeacherId == teacher.Id && !c.IsDeleted)
+                .ToList();
+
+            // Get all related data
+            var categories = await _unitOfWork.Categories.GetAllAsync();
+            var sections = await _unitOfWork.CourseSections.GetAllAsync();
+            var materials = await _unitOfWork.SectionMaterials.GetAllAsync();
+            var quizzes = await _unitOfWork.Quizzes.GetAllAsync();
+            var questions = await _unitOfWork.QuizQuestions.GetAllAsync();
+            var options = await _unitOfWork.QuizOptions.GetAllAsync();
+            var flashcards = await _unitOfWork.Flashcards.GetAllAsync();
+            var enrollments = await _unitOfWork.Enrollments.GetAllAsync();
+
+            var courseList = new List<CourseResponseDto>();
+
+            foreach (var course in teacherCourses.OrderByDescending(c => c.CreatedAt))
+            {
+                var category = categories.FirstOrDefault(cat => cat.Id == course.CategoryId);
+                var courseSections = sections.Where(s => s.CourseId == course.Id).OrderBy(s => s.OrderIndex).ToList();
+                var courseQuizzes = quizzes.Where(q => q.CourseId == course.Id).ToList();
+                var courseFlashcards = flashcards.Where(f => f.CourseId == course.Id).ToList();
+                var courseEnrollments = enrollments.Where(e => e.CourseId == course.Id).ToList();
+
+                var sectionDtos = new List<CourseSectionDto>();
+                var totalMaterials = 0;
+
+                foreach (var section in courseSections)
+                {
+                    var sectionMaterials = materials.Where(m => m.SectionId == section.Id).OrderBy(m => m.OrderIndex).ToList();
+                    totalMaterials += sectionMaterials.Count;
+
+                    sectionDtos.Add(new CourseSectionDto
+                    {
+                        Id = section.Id,
+                        Title = section.Title,
+                        Description = section.Description,
+                        OrderIndex = section.OrderIndex,
+                        CreatedAt = section.CreatedAt,
+                        Materials = sectionMaterials.Select(m => new SectionMaterialDto
+                        {
+                            Id = m.Id,
+                            Title = m.Title,
+                            Description = m.Description,
+                            MaterialType = m.MaterialType,
+                            FileUrl = m.FileUrl,
+                            FileName = m.FileName,
+                            FileSize = m.FileSize,
+                            OrderIndex = m.OrderIndex
+                        }).ToList()
+                    });
+                }
+
+                var quizDtos = new List<QuizDto>();
+                var totalQuestions = 0;
+
+                foreach (var quiz in courseQuizzes)
+                {
+                    var quizQuestions = questions.Where(q => q.QuizId == quiz.Id).ToList();
+                    totalQuestions += quizQuestions.Count;
+
+                    quizDtos.Add(new QuizDto
+                    {
+                        Id = quiz.Id,
+                        Title = quiz.Title,
+                        Questions = quizQuestions.Select(q => new QuizQuestionDto
+                        {
+                            Id = q.Id,
+                            QuestionText = q.QuestionText,
+                            QuestionType = q.QuestionType,
+                            Options = options.Where(o => o.QuestionId == q.Id).Select(o => new QuizOptionDto
+                            {
+                                Id = o.Id,
+                                OptionText = o.OptionText,
+                                IsCorrect = o.IsCorrect
+                            }).ToList()
+                        }).ToList()
+                    });
+                }
+
+                var flashcardDtos = courseFlashcards.Select(f => new FlashcardDto
+                {
+                    Id = f.Id,
+                    Front = f.Front,
+                    Back = f.Back
+                }).ToList();
+
+                courseList.Add(new CourseResponseDto
+                {
+                    Id = course.Id,
+                    Title = course.Title,
+                    Description = course.Description,
+                    Price = course.Price ?? 0,
+                    Status = course.Status ?? "pending",
+                    RejectReason = course.RejectReason,
+                    IsDeleted = course.IsDeleted,
+                    CategoryId = course.CategoryId,
+                    CategoryName = category?.Name,
+                    CreatedAt = course.CreatedAt,
+                    UpdatedAt = course.UpdatedAt,
+                    DeletedAt = course.DeletedAt,
+                    TotalSections = courseSections.Count,
+                    TotalMaterials = totalMaterials,
+                    TotalQuizzes = courseQuizzes.Count,
+                    TotalQuestions = totalQuestions,
+                    TotalFlashcards = courseFlashcards.Count,
+                    TotalEnrollments = courseEnrollments.Count,
+                    Sections = sectionDtos,
+                    Quizzes = quizDtos,
+                    Flashcards = flashcardDtos
+                });
+            }
+
+            return (true, $"Retrieved {courseList.Count} active course(s) successfully", courseList);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error retrieving courses: {ex.Message}", null);
+        }
+    }
+
+    public async Task<(bool Success, string Message, CourseResponseDto? Data)> GetCourseDetailAsync(int courseId, int userId)
+    {
+        try
+        {
+            // Get teacher record from user ID
+            var teachers = await _unitOfWork.Teachers.GetAllAsync();
+            var teacher = teachers.FirstOrDefault(t => t.UserId == userId);
+            
+            if (teacher == null)
+            {
+                return (false, "Teacher profile not found for this user", null);
+            }
+
+            // Get course
+            var course = await _unitOfWork.Courses.GetByIdAsync(courseId);
+            
+            if (course == null)
+            {
+                return (false, "Course not found", null);
+            }
+
+            // Verify ownership
+            if (course.TeacherId != teacher.Id)
+            {
+                return (false, "You don't have permission to view this course", null);
+            }
+
+            // Get all related data
+            var categories = await _unitOfWork.Categories.GetAllAsync();
+            var category = categories.FirstOrDefault(cat => cat.Id == course.CategoryId);
+            
+            var sections = await _unitOfWork.CourseSections.GetAllAsync();
+            var courseSections = sections.Where(s => s.CourseId == course.Id).OrderBy(s => s.OrderIndex).ToList();
+            
+            var materials = await _unitOfWork.SectionMaterials.GetAllAsync();
+            var quizzes = await _unitOfWork.Quizzes.GetAllAsync();
+            var courseQuizzes = quizzes.Where(q => q.CourseId == course.Id).ToList();
+            
+            var questions = await _unitOfWork.QuizQuestions.GetAllAsync();
+            var options = await _unitOfWork.QuizOptions.GetAllAsync();
+            
+            var flashcards = await _unitOfWork.Flashcards.GetAllAsync();
+            var courseFlashcards = flashcards.Where(f => f.CourseId == course.Id).ToList();
+            
+            var enrollments = await _unitOfWork.Enrollments.GetAllAsync();
+            var courseEnrollments = enrollments.Where(e => e.CourseId == course.Id).ToList();
+
+            var sectionDtos = new List<CourseSectionDto>();
+            var totalMaterials = 0;
+
+            foreach (var section in courseSections)
+            {
+                var sectionMaterials = materials.Where(m => m.SectionId == section.Id).OrderBy(m => m.OrderIndex).ToList();
+                totalMaterials += sectionMaterials.Count;
+
+                sectionDtos.Add(new CourseSectionDto
+                {
+                    Id = section.Id,
+                    Title = section.Title,
+                    Description = section.Description,
+                    OrderIndex = section.OrderIndex,
+                    CreatedAt = section.CreatedAt,
+                    Materials = sectionMaterials.Select(m => new SectionMaterialDto
+                    {
+                        Id = m.Id,
+                        Title = m.Title,
+                        Description = m.Description,
+                        MaterialType = m.MaterialType,
+                        FileUrl = m.FileUrl,
+                        FileName = m.FileName,
+                        FileSize = m.FileSize,
+                        OrderIndex = m.OrderIndex
+                    }).ToList()
+                });
+            }
+
+            var quizDtos = new List<QuizDto>();
+            var totalQuestions = 0;
+
+            foreach (var quiz in courseQuizzes)
+            {
+                var quizQuestions = questions.Where(q => q.QuizId == quiz.Id).ToList();
+                totalQuestions += quizQuestions.Count;
+
+                quizDtos.Add(new QuizDto
+                {
+                    Id = quiz.Id,
+                    Title = quiz.Title,
+                    Questions = quizQuestions.Select(q => new QuizQuestionDto
+                    {
+                        Id = q.Id,
+                        QuestionText = q.QuestionText,
+                        QuestionType = q.QuestionType,
+                        Options = options.Where(o => o.QuestionId == q.Id).Select(o => new QuizOptionDto
+                        {
+                            Id = o.Id,
+                            OptionText = o.OptionText,
+                            IsCorrect = o.IsCorrect
+                        }).ToList()
+                    }).ToList()
+                });
+            }
+
+            var flashcardDtos = courseFlashcards.Select(f => new FlashcardDto
+            {
+                Id = f.Id,
+                Front = f.Front,
+                Back = f.Back
+            }).ToList();
+
+            var courseResponse = new CourseResponseDto
+            {
+                Id = course.Id,
+                Title = course.Title,
+                Description = course.Description,
+                Price = course.Price ?? 0,
+                Status = course.Status ?? "pending",
+                RejectReason = course.RejectReason,
+                IsDeleted = course.IsDeleted,
+                CategoryId = course.CategoryId,
+                CategoryName = category?.Name,
+                CreatedAt = course.CreatedAt,
+                UpdatedAt = course.UpdatedAt,
+                DeletedAt = course.DeletedAt,
+                TotalSections = courseSections.Count,
+                TotalMaterials = totalMaterials,
+                TotalQuizzes = courseQuizzes.Count,
+                TotalQuestions = totalQuestions,
+                TotalFlashcards = courseFlashcards.Count,
+                TotalEnrollments = courseEnrollments.Count,
+                Sections = sectionDtos,
+                Quizzes = quizDtos,
+                Flashcards = flashcardDtos
+            };
+
+            return (true, "Course retrieved successfully", courseResponse);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error retrieving course: {ex.Message}", null);
         }
     }
 }

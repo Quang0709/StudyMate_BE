@@ -36,6 +36,7 @@ namespace StudyMate_BE
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
 
             builder.Services.AddHostedService<AdminSeederService>();
             builder.Services.AddHostedService<TokenCleanupService>();
@@ -59,6 +60,31 @@ namespace StudyMate_BE
                             Encoding.UTF8.GetBytes(secretKey!)
                         ),
                         ClockSkew = TimeSpan.Zero
+                    };
+
+                    // Custom event to accept token with or without "Bearer" prefix
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var authorizationHeader = context.Request.Headers["Authorization"].ToString();
+                            
+                            if (!string.IsNullOrEmpty(authorizationHeader))
+                            {
+                                // If token starts with "Bearer ", remove it
+                                if (authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    context.Token = authorizationHeader.Substring("Bearer ".Length).Trim();
+                                }
+                                // If it's just the token without "Bearer", use it directly
+                                else
+                                {
+                                    context.Token = authorizationHeader.Trim();
+                                }
+                            }
+
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 

@@ -20,6 +20,62 @@ public class CourseController : ControllerBase
     }
 
     /// <summary>
+    /// Get all active courses created by the logged-in teacher (excludes soft-deleted courses)
+    /// </summary>
+    [HttpGet("my-courses")]
+    public async Task<IActionResult> GetMyCourses()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+        {
+            return Unauthorized(new { message = "Invalid token" });
+        }
+
+        var (success, message, data) = await _courseService.GetMyCoursesAsync(userId);
+
+        if (!success)
+        {
+            return BadRequest(new { message });
+        }
+
+        return Ok(new
+        {
+            message,
+            count = data?.Count ?? 0,
+            data
+        });
+    }
+
+    /// <summary>
+    /// Get detailed information of a specific course by ID (Teacher only - must be owner)
+    /// </summary>
+    /// <param name="id">Course ID</param>
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetCourseDetail(int id)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+        {
+            return Unauthorized(new { message = "Invalid token" });
+        }
+
+        var (success, message, data) = await _courseService.GetCourseDetailAsync(id, userId);
+
+        if (!success)
+        {
+            return BadRequest(new { message });
+        }
+
+        return Ok(new
+        {
+            message,
+            data
+        });
+    }
+
+    /// <summary>
     /// Create a new course with sections, quizzes and flashcards (Teacher only)
     /// </summary>
     /// <remarks>

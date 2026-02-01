@@ -175,4 +175,119 @@ public class CourseController : ControllerBase
             data
         });
     }
+
+    /// <summary>
+    /// Update an existing course with all its contents (Teacher only - must be owner)
+    /// </summary>
+    /// <param name="id">Course ID</param>
+    /// <param name="updateCourseDto">Course update data</param>
+    /// <remarks>
+    /// Sample request:
+    /// 
+    ///     PUT /api/course/update/1
+    ///     {
+    ///         "title": "Updated Course Title",
+    ///         "description": "Updated description",
+    ///         "price": 149.99,
+    ///         "categoryId": 2,
+    ///         "sections": [
+    ///             {
+    ///                 "id": 1,
+    ///                 "title": "Updated Section 1",
+    ///                 "description": "Updated section description",
+    ///                 "orderIndex": 1,
+    ///                 "materials": [
+    ///                     {
+    ///                         "id": 1,
+    ///                         "title": "Updated Material",
+    ///                         "description": "Updated material description",
+    ///                         "materialType": "pdf",
+    ///                         "fileUrl": "https://example.com/updated.pdf",
+    ///                         "fileName": "updated.pdf",
+    ///                         "fileSize": 3048576,
+    ///                         "orderIndex": 1
+    ///                     },
+    ///                     {
+    ///                         "title": "New Material",
+    ///                         "materialType": "video",
+    ///                         "fileUrl": "https://example.com/new-video.mp4",
+    ///                         "orderIndex": 2
+    ///                     }
+    ///                 ]
+    ///             },
+    ///             {
+    ///                 "title": "New Section 2",
+    ///                 "description": "Brand new section",
+    ///                 "orderIndex": 2,
+    ///                 "materials": []
+    ///             }
+    ///         ],
+    ///         "quizzes": [
+    ///             {
+    ///                 "id": 1,
+    ///                 "title": "Updated Quiz 1",
+    ///                 "questions": [
+    ///                     {
+    ///                         "id": 1,
+    ///                         "questionText": "Updated question?",
+    ///                         "questionType": "multiple_choice",
+    ///                         "options": [
+    ///                             { "id": 1, "optionText": "Updated option 1", "isCorrect": true },
+    ///                             { "id": 2, "optionText": "Updated option 2", "isCorrect": false },
+    ///                             { "optionText": "New option 3", "isCorrect": false }
+    ///                         ]
+    ///                     }
+    ///                 ]
+    ///             }
+    ///         ],
+    ///         "flashcards": [
+    ///             {
+    ///                 "id": 1,
+    ///                 "front": "Updated front",
+    ///                 "back": "Updated back"
+    ///             },
+    ///             {
+    ///                 "front": "New flashcard front",
+    ///                 "back": "New flashcard back"
+    ///             }
+    ///         ]
+    ///     }
+    ///     
+    /// **Important Notes:**
+    /// - Include "id" field for existing items to update them
+    /// - Omit "id" field for new items to create them
+    /// - Items not included in the request will be deleted
+    /// - Maximum 50 questions per quiz
+    /// - Maximum 50 flashcards per course
+    /// - Only the course owner can update
+    /// </remarks>
+    [HttpPut("update/{id}")]
+    public async Task<IActionResult> UpdateCourse(int id, [FromBody] UpdateCourseDto updateCourseDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        // Get user ID from JWT claims
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+        {
+            return Unauthorized(new { message = "Invalid token" });
+        }
+
+        var (success, message, data) = await _courseService.UpdateCourseAsync(id, userId, updateCourseDto);
+
+        if (!success)
+        {
+            return BadRequest(new { message });
+        }
+
+        return Ok(new
+        {
+            message,
+            data
+        });
+    }
 }

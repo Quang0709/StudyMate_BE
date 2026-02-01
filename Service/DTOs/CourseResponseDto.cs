@@ -14,6 +14,10 @@ public class CourseResponseDto
     public bool IsDeleted { get; set; }
     public int? CategoryId { get; set; }
     public string? CategoryName { get; set; }
+    public string? TeacherName { get; set; }
+    public string? TeacherAvatar { get; set; }
+    public double AverageRating { get; set; }
+    public int TotalRatings { get; set; }
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }

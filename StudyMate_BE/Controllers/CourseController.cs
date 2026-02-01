@@ -9,7 +9,6 @@ namespace StudyMate_BE.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "teacher")]
 public class CourseController : ControllerBase
 {
     private readonly ICourseService _courseService;
@@ -20,9 +19,50 @@ public class CourseController : ControllerBase
     }
 
     /// <summary>
+    /// Get all approved and active courses (Public access - no authentication required)
+    /// </summary>
+    /// <remarks>
+    /// This endpoint returns all courses that are:
+    /// - Status: "approved"
+    /// - Not deleted (IsDeleted = false)
+    /// 
+    /// Includes:
+    /// - Course basic information
+    /// - Teacher information (name and avatar)
+    /// - Average rating and total ratings
+    /// - Statistics (sections, materials, quizzes, questions, flashcards, enrollments)
+    /// - Full course content (sections with materials, quizzes with questions, flashcards)
+    /// 
+    /// No authentication required - anyone can view public courses.
+    /// </remarks>
+    /// <response code="200">Returns list of courses successfully</response>
+    /// <response code="400">If there's an error retrieving courses</response>
+    [HttpGet("all")]
+    [AllowAnonymous]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> GetAllCourses()
+    {
+        var (success, message, data) = await _courseService.GetAllPublicCoursesAsync();
+
+        if (!success)
+        {
+            return BadRequest(new { message });
+        }
+
+        return Ok(new
+        {
+            message,
+            count = data?.Count ?? 0,
+            data
+        });
+    }
+
+    /// <summary>
     /// Get all active courses created by the logged-in teacher (excludes soft-deleted courses)
     /// </summary>
     [HttpGet("my-courses")]
+    [Authorize(Roles = "teacher")]
     public async Task<IActionResult> GetMyCourses()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -52,6 +92,7 @@ public class CourseController : ControllerBase
     /// </summary>
     /// <param name="id">Course ID</param>
     [HttpGet("{id}")]
+    [Authorize(Roles = "teacher")]
     public async Task<IActionResult> GetCourseDetail(int id)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -141,6 +182,7 @@ public class CourseController : ControllerBase
     /// - Supported material types: pdf, video, document, link, image, other
     /// </remarks>
     [HttpPost("create")]
+    [Authorize(Roles = "teacher")]
     public async Task<IActionResult> CreateCourse([FromBody] CreateCourseDto createCourseDto)
     {
         if (!ModelState.IsValid)
@@ -262,6 +304,7 @@ public class CourseController : ControllerBase
     /// - Only the course owner can update
     /// </remarks>
     [HttpPut("update/{id}")]
+    [Authorize(Roles = "teacher")]
     public async Task<IActionResult> UpdateCourse(int id, [FromBody] UpdateCourseDto updateCourseDto)
     {
         if (!ModelState.IsValid)

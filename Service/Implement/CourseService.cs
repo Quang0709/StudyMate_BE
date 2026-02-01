@@ -986,4 +986,89 @@ public class CourseService : ICourseService
             }
         }
     }
+
+    public async Task<(bool Success, string Message, List<CourseSummaryDto>? Data)> GetAllPublicCoursesAsync()
+    {
+        try
+        {
+            // Get all paid courses that are not deleted
+            var allCourses = await _unitOfWork.Courses.GetAllAsync();
+            var publicCourses = allCourses
+                .Where(c => c.Status == "paid" && !c.IsDeleted)
+                .ToList();
+
+            // Get all related data for statistics
+            var categories = await _unitOfWork.Categories.GetAllAsync();
+            var sections = await _unitOfWork.CourseSections.GetAllAsync();
+            var materials = await _unitOfWork.SectionMaterials.GetAllAsync();
+            var quizzes = await _unitOfWork.Quizzes.GetAllAsync();
+            var questions = await _unitOfWork.QuizQuestions.GetAllAsync();
+            var flashcards = await _unitOfWork.Flashcards.GetAllAsync();
+            var enrollments = await _unitOfWork.Enrollments.GetAllAsync();
+            var teachers = await _unitOfWork.Teachers.GetAllAsync();
+            var users = await _unitOfWork.Users.GetAllAsync();
+            var ratings = await _unitOfWork.CourseRatings.GetAllAsync();
+
+            var courseList = new List<CourseSummaryDto>();
+
+            foreach (var course in publicCourses.OrderByDescending(c => c.CreatedAt))
+            {
+                var category = categories.FirstOrDefault(cat => cat.Id == course.CategoryId);
+                var courseSections = sections.Where(s => s.CourseId == course.Id).ToList();
+                var courseQuizzes = quizzes.Where(q => q.CourseId == course.Id).ToList();
+                var courseFlashcards = flashcards.Where(f => f.CourseId == course.Id).ToList();
+                var courseEnrollments = enrollments.Where(e => e.CourseId == course.Id).ToList();
+                var courseRatings = ratings.Where(r => r.CourseId == course.Id).ToList();
+
+                // Get teacher information
+                var teacher = teachers.FirstOrDefault(t => t.Id == course.TeacherId);
+                var teacherUser = teacher != null ? users.FirstOrDefault(u => u.Id == teacher.UserId) : null;
+
+                // Calculate statistics
+                var totalMaterials = 0;
+                foreach (var section in courseSections)
+                {
+                    totalMaterials += materials.Count(m => m.SectionId == section.Id);
+                }
+
+                var totalQuestions = 0;
+                foreach (var quiz in courseQuizzes)
+                {
+                    totalQuestions += questions.Count(q => q.QuizId == quiz.Id);
+                }
+
+                // Calculate average rating
+                var averageRating = courseRatings.Any() 
+                    ? courseRatings.Average(r => r.Rating ?? 0) 
+                    : 0;
+
+                courseList.Add(new CourseSummaryDto
+                {
+                    Id = course.Id,
+                    Title = course.Title,
+                    Description = course.Description,
+                    Price = course.Price ?? 0,
+                    CategoryName = category?.Name,
+                    TeacherName = teacherUser?.FullName,
+                    TeacherAvatar = teacherUser?.AvatarUrl,
+                    AverageRating = averageRating,
+                    TotalRatings = courseRatings.Count,
+                    CreatedAt = course.CreatedAt,
+                    UpdatedAt = course.UpdatedAt,
+                    TotalSections = courseSections.Count,
+                    TotalMaterials = totalMaterials,
+                    TotalQuizzes = courseQuizzes.Count,
+                    TotalQuestions = totalQuestions,
+                    TotalFlashcards = courseFlashcards.Count,
+                    TotalEnrollments = courseEnrollments.Count
+                });
+            }
+
+            return (true, $"Retrieved {courseList.Count} course(s) successfully", courseList);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error retrieving courses: {ex.Message}", null);
+        }
+    }
 }

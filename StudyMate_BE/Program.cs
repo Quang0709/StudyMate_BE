@@ -37,6 +37,9 @@ namespace StudyMate_BE
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+            builder.Services.AddScoped<ICourse2Service, Course2Service>();
+
 
             builder.Services.AddHostedService<AdminSeederService>();
             builder.Services.AddHostedService<TokenCleanupService>();

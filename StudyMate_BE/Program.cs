@@ -39,6 +39,7 @@ namespace StudyMate_BE
             builder.Services.AddScoped<ICourseService, CourseService>();
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourse2Service, Course2Service>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 
             builder.Services.AddHostedService<AdminSeederService>();

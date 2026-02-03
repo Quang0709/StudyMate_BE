@@ -11,11 +11,13 @@ namespace StudyMate_BE.Controllers;
 [Route("api/[controller]")]
 public class CourseController : ControllerBase
 {
-    private readonly ICourseService _courseService;
+    private readonly ICourseService _courseService;private readonly ICourse2Service _course2Service;
 
-    public CourseController(ICourseService courseService)
+
+    public CourseController(ICourseService courseService, ICourse2Service course2Service)
     {
         _courseService = courseService;
+        _course2Service = course2Service;
     }
 
     /// <summary>
@@ -331,6 +333,37 @@ public class CourseController : ControllerBase
         {
             message,
             data
+        });
+    }
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] SearchCourseDto dto)
+    {
+        var result = await _course2Service.SearchAsync(dto);
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> SoftDeleteCourse(int id)
+    {
+        // Get user ID from JWT claims
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+        {
+            return Unauthorized(new { message = "Invalid token" });
+        }
+
+        var (success, message) = await _course2Service.SoftDeleteAsync(id, userId);
+
+        if (!success)
+        {
+            return BadRequest(new { message });
+        }
+
+        return Ok(new
+        {
+            message
         });
     }
 }

@@ -40,10 +40,12 @@ namespace StudyMate_BE
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourse2Service, Course2Service>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IPremiumPlanService, PremiumPlanService>();
 
 
             builder.Services.AddHostedService<AdminSeederService>();
             builder.Services.AddHostedService<TokenCleanupService>();
+            builder.Services.AddHostedService<SubscriptionExpiryService>();
 
             // ===================== JWT AUTH =====================
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");

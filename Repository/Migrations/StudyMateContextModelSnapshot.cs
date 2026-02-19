@@ -560,6 +560,12 @@ namespace Repository.Migrations
                         .HasColumnType("decimal(10, 2)")
                         .HasColumnName("price");
 
+                    b.Property<string>("TargetRole")
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("target_role");
+
                     b.HasKey("Id")
                         .HasName("PK__premium___3213E83F411D9987");
 
@@ -968,6 +974,12 @@ namespace Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("end_date");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
                     b.Property<int>("PlanId")
                         .HasColumnType("int")
                         .HasColumnName("plan_id");
@@ -978,9 +990,13 @@ namespace Repository.Migrations
                         .HasColumnName("start_date")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<int>("StudentId")
+                    b.Property<int?>("StudentId")
                         .HasColumnType("int")
                         .HasColumnName("student_id");
+
+                    b.Property<int?>("TeacherId")
+                        .HasColumnType("int")
+                        .HasColumnName("teacher_id");
 
                     b.HasKey("Id")
                         .HasName("PK__user_sub__3213E83FEB6A363E");
@@ -988,6 +1004,8 @@ namespace Repository.Migrations
                     b.HasIndex("PlanId");
 
                     b.HasIndex("StudentId");
+
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("user_subscriptions", (string)null);
                 });
@@ -1210,12 +1228,20 @@ namespace Repository.Migrations
                     b.HasOne("Repository.Model.Student", "Student")
                         .WithMany("UserSubscriptions")
                         .HasForeignKey("StudentId")
-                        .IsRequired()
+                        .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_Sub_Student");
+
+                    b.HasOne("Repository.Model.Teacher", "Teacher")
+                        .WithMany("UserSubscriptions")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_Sub_Teacher");
 
                     b.Navigation("Plan");
 
                     b.Navigation("Student");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Repository.Model.Category", b =>
@@ -1273,6 +1299,8 @@ namespace Repository.Migrations
             modelBuilder.Entity("Repository.Model.Teacher", b =>
                 {
                     b.Navigation("Courses");
+
+                    b.Navigation("UserSubscriptions");
                 });
 
             modelBuilder.Entity("Repository.Model.User", b =>

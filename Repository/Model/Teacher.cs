@@ -14,4 +14,6 @@ public partial class Teacher
     public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
 
     public virtual User User { get; set; } = null!;
+
+    public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
 }

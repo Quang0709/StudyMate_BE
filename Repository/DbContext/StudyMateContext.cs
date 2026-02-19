@@ -250,6 +250,10 @@ public partial class StudyMateContext : DbContext
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("price");
+            entity.Property(e => e.TargetRole)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("target_role");
         });
 
         modelBuilder.Entity<Quiz>(entity =>
@@ -487,15 +491,19 @@ public partial class StudyMateContext : DbContext
             entity.ToTable("user_subscriptions");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.EndDate)
-                .HasColumnType("datetime")
-                .HasColumnName("end_date");
+            entity.Property(e => e.StudentId).HasColumnName("student_id");
+            entity.Property(e => e.TeacherId).HasColumnName("teacher_id");
             entity.Property(e => e.PlanId).HasColumnName("plan_id");
             entity.Property(e => e.StartDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("start_date");
-            entity.Property(e => e.StudentId).HasColumnName("student_id");
+            entity.Property(e => e.EndDate)
+                .HasColumnType("datetime")
+                .HasColumnName("end_date");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
 
             entity.HasOne(d => d.Plan).WithMany(p => p.UserSubscriptions)
                 .HasForeignKey(d => d.PlanId)
@@ -504,8 +512,13 @@ public partial class StudyMateContext : DbContext
 
             entity.HasOne(d => d.Student).WithMany(p => p.UserSubscriptions)
                 .HasForeignKey(d => d.StudentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.NoAction)
                 .HasConstraintName("FK_Sub_Student");
+
+            entity.HasOne(d => d.Teacher).WithMany(p => p.UserSubscriptions)
+                .HasForeignKey(d => d.TeacherId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_Sub_Teacher");
         });
 
         modelBuilder.Entity<RefreshToken>(entity =>

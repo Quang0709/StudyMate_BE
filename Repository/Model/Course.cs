@@ -39,6 +39,8 @@ public partial class Course
 
     public virtual ICollection<CourseSection> CourseSections { get; set; } = new List<CourseSection>();
 
+    public virtual ICollection<CoursePurchase> CoursePurchases { get; set; } = new List<CoursePurchase>();
+
     public virtual Category? Category { get; set; }
 
     public virtual Teacher Teacher { get; set; } = null!;

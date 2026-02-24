@@ -159,6 +159,58 @@ namespace Repository.Migrations
                     b.ToTable("courses", (string)null);
                 });
 
+            modelBuilder.Entity("Repository.Model.CoursePurchase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int")
+                        .HasColumnName("course_id");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("completed")
+                        .HasColumnName("payment_status");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("purchase_date")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<decimal>("PurchasePrice")
+                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnName("purchase_price");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int")
+                        .HasColumnName("student_id");
+
+                    b.Property<string>("TransactionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("transaction_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK__course_purchases");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex(new[] { "StudentId", "CourseId" }, "UQ__course_purchases_student_course")
+                        .IsUnique();
+
+                    b.ToTable("course_purchases", (string)null);
+                });
+
             modelBuilder.Entity("Repository.Model.CourseRating", b =>
                 {
                     b.Property<int>("Id")
@@ -1049,6 +1101,27 @@ namespace Repository.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("Repository.Model.CoursePurchase", b =>
+                {
+                    b.HasOne("Repository.Model.Course", "Course")
+                        .WithMany("CoursePurchases")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_CoursePurchase_Course");
+
+                    b.HasOne("Repository.Model.Student", "Student")
+                        .WithMany("CoursePurchases")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_CoursePurchase_Student");
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("Repository.Model.CourseRating", b =>
                 {
                     b.HasOne("Repository.Model.Course", "Course")
@@ -1251,6 +1324,8 @@ namespace Repository.Migrations
 
             modelBuilder.Entity("Repository.Model.Course", b =>
                 {
+                    b.Navigation("CoursePurchases");
+
                     b.Navigation("CourseRatings");
 
                     b.Navigation("CourseSections");
@@ -1289,6 +1364,8 @@ namespace Repository.Migrations
 
             modelBuilder.Entity("Repository.Model.Student", b =>
                 {
+                    b.Navigation("CoursePurchases");
+
                     b.Navigation("CourseRatings");
 
                     b.Navigation("Enrollments");

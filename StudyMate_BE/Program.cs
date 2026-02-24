@@ -47,6 +47,11 @@ namespace StudyMate_BE
             builder.Services.AddHostedService<TokenCleanupService>();
             builder.Services.AddHostedService<SubscriptionExpiryService>();
 
+
+            builder.Services.AddScoped<IUserSubscriptionRepository, UserSubscriptionRepository>();
+            builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+            builder.Services.AddScoped<ICourse2Service, Course2Service>();
+
             // ===================== JWT AUTH =====================
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["SecretKey"];

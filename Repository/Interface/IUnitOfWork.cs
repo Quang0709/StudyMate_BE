@@ -16,6 +16,7 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<Course> Courses { get; }
     IGenericRepository<Enrollment> Enrollments { get; }
     IGenericRepository<CourseRating> CourseRatings { get; }
+    IGenericRepository<CoursePurchase> CoursePurchases { get; }
     IGenericRepository<Post> Posts { get; }
     IGenericRepository<Comment> Comments { get; }
     IGenericRepository<Transaction> Transactions { get; }

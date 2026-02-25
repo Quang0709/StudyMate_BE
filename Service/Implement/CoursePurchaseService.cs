@@ -44,7 +44,7 @@ public class CoursePurchaseService : ICoursePurchaseService
             }
 
             // Check if course is approved
-            if (course.Status != "approved")
+            if (course.Status != "paid")
             {
                 return (false, "This course is not available for purchase yet", null);
             }

@@ -150,32 +150,7 @@ public partial class StudyMateContext : DbContext
                 .HasConstraintName("FK_Course_Category");
         });
 
-        modelBuilder.Entity<CourseRating>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__course_r__3213E83FF292E4A6");
-
-            entity.ToTable("course_ratings");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Comment).HasColumnName("comment");
-            entity.Property(e => e.CourseId).HasColumnName("course_id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("created_at");
-            entity.Property(e => e.Rating).HasColumnName("rating");
-            entity.Property(e => e.StudentId).HasColumnName("student_id");
-
-            entity.HasOne(d => d.Course).WithMany(p => p.CourseRatings)
-                .HasForeignKey(d => d.CourseId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Rate_Course");
-
-            entity.HasOne(d => d.Student).WithMany(p => p.CourseRatings)
-                .HasForeignKey(d => d.StudentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Rate_Student");
-        });
+    
 
         modelBuilder.Entity<Enrollment>(entity =>
         {

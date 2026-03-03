@@ -21,4 +21,8 @@ public partial class CoursePurchase
     public virtual Student Student { get; set; } = null!;
 
     public virtual Course Course { get; set; } = null!;
+    public long OrderCode { get; set; }
+    public string? PaymentLinkId { get; set; }
+
+
 }

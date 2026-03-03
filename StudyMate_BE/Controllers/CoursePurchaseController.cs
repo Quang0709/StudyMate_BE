@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DTOs;
 using Service.Interface;
@@ -143,5 +143,97 @@ public class CoursePurchaseController : ControllerBase
             message,
             data
         });
+    
+    
+    }
+    // ======================================================
+    // 1️⃣ TẠO LINK THANH TOÁN
+    // ======================================================
+    [Authorize]
+    [HttpPost("create-payment/{courseId}")]
+    public async Task<IActionResult> CreatePayment(int courseId)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var result = await _coursePurchaseService
+            .CreateCoursePaymentAsync(userId, courseId);
+
+        return Ok(result);
+    }
+
+    // ======================================================
+    // 2️⃣ MUA KHÓA HỌC (MANUAL COMPLETE - nếu cần)
+    // ======================================================
+    [Authorize]
+    [HttpPost("complete/{courseId}")]
+    public async Task<IActionResult> CompletePurchase(int courseId)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var result = await _coursePurchaseService
+            .PurchaseCourseAsync(userId, courseId);
+
+        if (!result.success)
+            return BadRequest(result.message);
+
+        return Ok(result);
+    }
+
+    // ======================================================
+    // 3️⃣ HỦY PAYMENT
+    // ======================================================
+    [Authorize]
+    [HttpPost("cancel/{orderCode}")]
+    public async Task<IActionResult> CancelPayment(long orderCode)
+    {
+        await _coursePurchaseService.CancelPaymentAsync(orderCode);
+        return Ok("Payment cancelled");
+    }
+
+    // ======================================================
+    // 4️⃣ CHECK ĐÃ MUA
+    // ======================================================
+    [Authorize]
+    [HttpGet("check/{courseId}")]
+    public async Task<IActionResult> Check(int courseId)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var result = await _coursePurchaseService
+            .CheckCoursePurchasedAsync(userId, courseId);
+
+        return Ok(result);
+    }
+
+    // ======================================================
+    // 5️⃣ LẤY DANH SÁCH ĐÃ MUA
+    // ======================================================
+    [Authorize]
+    [HttpGet("my-courses")]
+    public async Task<IActionResult> GetMyCourses()
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var result = await _coursePurchaseService
+            .GetMyPurchasedCoursesAsync(userId);
+
+        return Ok(result);
+    }
+
+    // ======================================================
+    // 6️⃣ SUMMARY
+    // ======================================================
+    [Authorize]
+    [HttpGet("summary")]
+    public async Task<IActionResult> Summary()
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var result = await _coursePurchaseService
+            .GetMyPurchasesSummaryAsync(userId);
+
+        return Ok(result);
     }
 }
+
+

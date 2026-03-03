@@ -172,6 +172,12 @@ namespace Repository.Migrations
                         .HasColumnType("int")
                         .HasColumnName("course_id");
 
+                    b.Property<long>("OrderCode")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PaymentLinkId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
                         .ValueGeneratedOnAdd()

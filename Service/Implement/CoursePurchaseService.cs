@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Repository.Interface;
 using Repository.Model;
 using Service.DTOs;
@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PayOS;
 
 namespace Service.Implement;
 
@@ -19,65 +20,106 @@ public class CoursePurchaseService : ICoursePurchaseService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<(bool success, string message, CoursePurchaseDto? data)> PurchaseCourseAsync(int userId, int courseId)
+    // =========================================================
+    // 1️⃣ TẠO LINK THANH TOÁN
+    // =========================================================
+    public async Task<CreatePaymentResponse> CreateCoursePaymentAsync(int userId, int courseId)
+    {
+        var student = await _unitOfWork.Students
+            .FirstOrDefaultAsync(s => s.UserId == userId);
+
+        if (student == null)
+            throw new Exception("Student profile not found");
+
+        var course = await _unitOfWork.Courses.GetByIdAsync(courseId);
+
+        if (course == null || course.IsDeleted)
+            throw new Exception("Course not found");
+
+        if (course.Price == null || course.Price <= 0)
+            throw new Exception("Course is free");
+
+        var existed = await _unitOfWork.CoursePurchases
+            .FirstOrDefaultAsync(x =>
+                x.StudentId == student.Id &&
+                x.CourseId == courseId &&
+                x.PaymentStatus == "completed");
+
+        if (existed != null)
+            throw new Exception("Course already purchased");
+
+        var orderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        var purchase = new CoursePurchase
+        {
+            StudentId = student.Id,
+            CourseId = courseId,
+            PurchasePrice = course.Price.Value,
+            PurchaseDate = DateTime.UtcNow,
+            PaymentStatus = "pending",
+            TransactionId = orderCode.ToString()
+        };
+
+        await _unitOfWork.CoursePurchases.AddAsync(purchase);
+        await _unitOfWork.SaveChangesAsync();
+
+        // Giả lập link thanh toán (vì PayOSClient của bạn không có method kia)
+        var checkoutUrl = $"https://yourdomain.com/payment/{orderCode}";
+
+        return new CreatePaymentResponse
+        {
+            CheckoutUrl = checkoutUrl,
+            PaymentLinkId = orderCode
+        };
+    }
+
+    // =========================================================
+    // 2️⃣ HỦY LINK THANH TOÁN
+    // =========================================================
+    public async Task CancelPaymentAsync(long paymentLinkId)
+    {
+        var purchase = await _unitOfWork.CoursePurchases
+            .FirstOrDefaultAsync(x => x.TransactionId == paymentLinkId.ToString());
+
+        if (purchase == null)
+            throw new Exception("Payment not found");
+
+        if (purchase.PaymentStatus == "completed")
+            throw new Exception("Cannot cancel completed payment");
+
+        purchase.PaymentStatus = "cancelled";
+
+        _unitOfWork.CoursePurchases.Update(purchase);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    // =========================================================
+    // 3️⃣ MUA KHÓA HỌC (SAU KHI PAYMENT SUCCESS)
+    // =========================================================
+    public async Task<(bool success, string message, CoursePurchaseDto? data)>
+        PurchaseCourseAsync(int userId, int courseId)
     {
         try
         {
-            // Get student profile
-            var student = await _unitOfWork.Students.FirstOrDefaultAsync(s => s.UserId == userId);
+            var student = await _unitOfWork.Students
+                .FirstOrDefaultAsync(s => s.UserId == userId);
+
             if (student == null)
-            {
-                return (false, "Student profile not found. Only students can purchase courses.", null);
-            }
+                return (false, "Student not found", null);
 
-            // Get course
-            var course = await _unitOfWork.Courses.GetByIdAsync(courseId);
-            if (course == null)
-            {
-                return (false, "Course not found", null);
-            }
+            var purchase = await _unitOfWork.CoursePurchases
+                .FirstOrDefaultAsync(x =>
+                    x.StudentId == student.Id &&
+                    x.CourseId == courseId &&
+                    x.PaymentStatus == "pending");
 
-            // Check if course is deleted
-            if (course.IsDeleted)
-            {
-                return (false, "This course is no longer available", null);
-            }
+            if (purchase == null)
+                return (false, "No pending payment found", null);
 
-            // Check if course is approved
-            if (course.Status != "paid")
-            {
-                return (false, "This course is not available for purchase yet", null);
-            }
+            purchase.PaymentStatus = "completed";
 
-            // Check if course has price (free courses don't need purchase)
-            if (course.Price == null || course.Price <= 0)
-            {
-                return (false, "This course is free. You can enroll directly without purchasing.", null);
-            }
+            _unitOfWork.CoursePurchases.Update(purchase);
 
-            // Check if student already purchased this course
-            var existingPurchase = await _unitOfWork.CoursePurchases.FirstOrDefaultAsync(
-                cp => cp.StudentId == student.Id && cp.CourseId == courseId);
-
-            if (existingPurchase != null)
-            {
-                return (false, "You have already purchased this course", null);
-            }
-
-            // Create purchase record
-            var purchase = new CoursePurchase
-            {
-                StudentId = student.Id,
-                CourseId = courseId,
-                PurchasePrice = course.Price.Value,
-                PurchaseDate = DateTime.UtcNow,
-                PaymentStatus = "completed",  // Auto completed (no real payment for now)
-                TransactionId = GenerateTransactionId()
-            };
-
-            await _unitOfWork.CoursePurchases.AddAsync(purchase);
-
-            // Auto enroll student to course after purchase
             var enrollment = new Enrollment
             {
                 StudentId = student.Id,
@@ -88,165 +130,162 @@ public class CoursePurchaseService : ICoursePurchaseService
             await _unitOfWork.Enrollments.AddAsync(enrollment);
             await _unitOfWork.SaveChangesAsync();
 
-            // Get teacher info for response
-            var teacher = await _unitOfWork.Teachers.GetByIdAsync(course.TeacherId);
-            var teacherUser = teacher != null ? await _unitOfWork.Users.GetByIdAsync(teacher.UserId) : null;
+            var course = await _unitOfWork.Courses.GetByIdAsync(courseId);
 
-            var purchaseDto = new CoursePurchaseDto
+            var dto = new CoursePurchaseDto
             {
                 Id = purchase.Id,
                 StudentId = purchase.StudentId,
                 CourseId = purchase.CourseId,
-                CourseTitle = course.Title,
-                CourseDescription = course.Description,
-                TeacherName = teacherUser?.FullName,
+                CourseTitle = course?.Title,
+                CourseDescription = course?.Description,
                 PurchasePrice = purchase.PurchasePrice,
                 PurchaseDate = purchase.PurchaseDate,
                 PaymentStatus = purchase.PaymentStatus,
                 TransactionId = purchase.TransactionId
             };
 
-            return (true, "Course purchased successfully! You now have lifetime access to this course.", purchaseDto);
+            return (true, "Course purchased successfully", dto);
         }
         catch (Exception ex)
         {
-            return (false, $"Error purchasing course: {ex.Message}", null);
+            return (false, ex.Message, null);
         }
     }
 
-    public async Task<(bool success, string message, List<CoursePurchaseDto>? data)> GetMyPurchasedCoursesAsync(int userId)
+    // =========================================================
+    // 4️⃣ CHECK ĐÃ MUA CHƯA
+    // =========================================================
+    public async Task<(bool success, string message)>
+        CheckCoursePurchasedAsync(int userId, int courseId)
     {
-        try
-        {
-            // Get student profile
-            var student = await _unitOfWork.Students.FirstOrDefaultAsync(s => s.UserId == userId);
-            if (student == null)
-            {
-                return (false, "Student profile not found", null);
-            }
+        var student = await _unitOfWork.Students
+            .FirstOrDefaultAsync(s => s.UserId == userId);
 
-            // Get all purchases
-            var purchases = await _unitOfWork.CoursePurchases.FindAsync(cp => cp.StudentId == student.Id);
+        if (student == null)
+            return (false, "Student not found");
 
-            var purchaseDtos = new List<CoursePurchaseDto>();
+        var purchase = await _unitOfWork.CoursePurchases
+            .FirstOrDefaultAsync(x =>
+                x.StudentId == student.Id &&
+                x.CourseId == courseId &&
+                x.PaymentStatus == "completed");
 
-            foreach (var purchase in purchases)
-            {
-                var course = await _unitOfWork.Courses.GetByIdAsync(purchase.CourseId);
-                if (course == null) continue;
+        if (purchase != null)
+            return (true, "Course already purchased");
 
-                var teacher = await _unitOfWork.Teachers.GetByIdAsync(course.TeacherId);
-                var teacherUser = teacher != null ? await _unitOfWork.Users.GetByIdAsync(teacher.UserId) : null;
-
-                purchaseDtos.Add(new CoursePurchaseDto
-                {
-                    Id = purchase.Id,
-                    StudentId = purchase.StudentId,
-                    CourseId = purchase.CourseId,
-                    CourseTitle = course.Title,
-                    CourseDescription = course.Description,
-                    TeacherName = teacherUser?.FullName,
-                    PurchasePrice = purchase.PurchasePrice,
-                    PurchaseDate = purchase.PurchaseDate,
-                    PaymentStatus = purchase.PaymentStatus,
-                    TransactionId = purchase.TransactionId
-                });
-            }
-
-            return (true, "Purchased courses retrieved successfully", purchaseDtos.OrderByDescending(p => p.PurchaseDate).ToList());
-        }
-        catch (Exception ex)
-        {
-            return (false, $"Error retrieving purchased courses: {ex.Message}", null);
-        }
+        return (false, "Course not purchased");
     }
 
-    public async Task<(bool success, string message)> CheckCoursePurchasedAsync(int userId, int courseId)
+    // =========================================================
+    // 5️⃣ LẤY DANH SÁCH ĐÃ MUA
+    // =========================================================
+    public async Task<(bool success, string message, List<CoursePurchaseDto>? data)>
+        GetMyPurchasedCoursesAsync(int userId)
     {
-        try
+        var student = await _unitOfWork.Students
+            .FirstOrDefaultAsync(s => s.UserId == userId);
+
+        if (student == null)
+            return (false, "Student not found", null);
+
+        var purchases = await _unitOfWork.CoursePurchases
+            .FindAsync(x =>
+                x.StudentId == student.Id &&
+                x.PaymentStatus == "completed");
+
+        var result = purchases.Select(p => new CoursePurchaseDto
         {
-            // Get student profile
-            var student = await _unitOfWork.Students.FirstOrDefaultAsync(s => s.UserId == userId);
-            if (student == null)
-            {
-                return (false, "Student profile not found");
-            }
+            Id = p.Id,
+            StudentId = p.StudentId,
+            CourseId = p.CourseId,
+            PurchasePrice = p.PurchasePrice,
+            PurchaseDate = p.PurchaseDate,
+            PaymentStatus = p.PaymentStatus,
+            TransactionId = p.TransactionId
+        }).ToList();
 
-            // Check if purchased
-            var purchase = await _unitOfWork.CoursePurchases.FirstOrDefaultAsync(
-                cp => cp.StudentId == student.Id && cp.CourseId == courseId);
-
-            if (purchase != null)
-            {
-                return (true, "Course already purchased");
-            }
-
-            return (false, "Course not purchased yet");
-        }
-        catch (Exception ex)
-        {
-            return (false, $"Error checking course purchase: {ex.Message}");
-        }
+        return (true, "Success", result);
     }
 
-    public async Task<(bool success, string message, MyPurchasedCoursesDto? data)> GetMyPurchasesSummaryAsync(int userId)
+    // =========================================================
+    // 6️⃣ SUMMARY
+    // =========================================================
+    public async Task<(bool success, string message, MyPurchasedCoursesDto? data)>
+        GetMyPurchasesSummaryAsync(int userId)
     {
-        try
+        var student = await _unitOfWork.Students
+            .FirstOrDefaultAsync(s => s.UserId == userId);
+
+        if (student == null)
+            return (false, "Student not found", null);
+
+        var purchases = await _unitOfWork.CoursePurchases
+            .FindAsync(x =>
+                x.StudentId == student.Id &&
+                x.PaymentStatus == "completed");
+
+        var list = purchases.ToList();
+
+        var summary = new MyPurchasedCoursesDto
         {
-            // Get student profile
-            var student = await _unitOfWork.Students.FirstOrDefaultAsync(s => s.UserId == userId);
-            if (student == null)
+            TotalPurchased = list.Count,
+            TotalSpent = list.Sum(x => x.PurchasePrice),
+            Purchases = list.Select(p => new CoursePurchaseDto
             {
-                return (false, "Student profile not found", null);
-            }
+                Id = p.Id,
+                CourseId = p.CourseId,
+                PurchasePrice = p.PurchasePrice,
+                PurchaseDate = p.PurchaseDate,
+                PaymentStatus = p.PaymentStatus,
+                TransactionId = p.TransactionId
+            }).ToList()
+        };
 
-            // Get all purchases
-            var purchases = await _unitOfWork.CoursePurchases.FindAsync(cp => cp.StudentId == student.Id);
-            var purchasesList = purchases.ToList();
+        return (true, "Success", summary);
+    }
 
-            var purchaseDtos = new List<CoursePurchaseDto>();
+    public async Task HandleWebhookAsync(PayOSWebhookRequest request)
+    {
+        if (request == null)
+            throw new Exception("Invalid webhook request");
 
-            foreach (var purchase in purchasesList)
+        var orderCode = request.OrderCode.ToString();
+
+        var purchase = await _unitOfWork.CoursePurchases
+            .FirstOrDefaultAsync(x => x.TransactionId == orderCode);
+
+        if (purchase == null)
+            throw new Exception("Purchase not found");
+
+        // Nếu thanh toán thành công
+        if (request.Status == "PAID")
+        {
+            purchase.PaymentStatus = "completed";
+
+            _unitOfWork.CoursePurchases.Update(purchase);
+
+            // Tạo enrollment
+            var enrollment = new Enrollment
             {
-                var course = await _unitOfWork.Courses.GetByIdAsync(purchase.CourseId);
-                if (course == null) continue;
-
-                var teacher = await _unitOfWork.Teachers.GetByIdAsync(course.TeacherId);
-                var teacherUser = teacher != null ? await _unitOfWork.Users.GetByIdAsync(teacher.UserId) : null;
-
-                purchaseDtos.Add(new CoursePurchaseDto
-                {
-                    Id = purchase.Id,
-                    StudentId = purchase.StudentId,
-                    CourseId = purchase.CourseId,
-                    CourseTitle = course.Title,
-                    CourseDescription = course.Description,
-                    TeacherName = teacherUser?.FullName,
-                    PurchasePrice = purchase.PurchasePrice,
-                    PurchaseDate = purchase.PurchaseDate,
-                    PaymentStatus = purchase.PaymentStatus,
-                    TransactionId = purchase.TransactionId
-                });
-            }
-
-            var summary = new MyPurchasedCoursesDto
-            {
-                TotalPurchased = purchasesList.Count,
-                TotalSpent = purchasesList.Sum(p => p.PurchasePrice),
-                Purchases = purchaseDtos.OrderByDescending(p => p.PurchaseDate).ToList()
+                StudentId = purchase.StudentId,
+                CourseId = purchase.CourseId,
+                EnrolledAt = DateTime.UtcNow
             };
 
-            return (true, "Purchase summary retrieved successfully", summary);
+            await _unitOfWork.Enrollments.AddAsync(enrollment);
         }
-        catch (Exception ex)
+        else if (request.Status == "CANCELLED")
         {
-            return (false, $"Error retrieving purchase summary: {ex.Message}", null);
+            purchase.PaymentStatus = "cancelled";
+            _unitOfWork.CoursePurchases.Update(purchase);
         }
-    }
+        else if (request.Status == "FAILED")
+        {
+            purchase.PaymentStatus = "failed";
+            _unitOfWork.CoursePurchases.Update(purchase);
+        }
 
-    private string GenerateTransactionId()
-    {
-        // Format: TXN + yyyyMMddHHmmss + random 4 digits
-        return $"TXN{DateTime.UtcNow:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
+        await _unitOfWork.SaveChangesAsync();
     }
 }

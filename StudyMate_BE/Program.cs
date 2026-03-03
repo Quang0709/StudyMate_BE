@@ -52,7 +52,8 @@ namespace StudyMate_BE
             builder.Services.AddScoped<IUserSubscriptionRepository, UserSubscriptionRepository>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<ICourse2Service, Course2Service>();
-
+            
+         builder.Services.AddScoped<ICoursePurchaseService, CoursePurchaseService>();
             // ===================== JWT AUTH =====================
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["SecretKey"];
@@ -114,7 +115,8 @@ namespace StudyMate_BE
             });
 
             // ===================== CONTROLLERS =====================
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                ;
 
             // ===================== SWAGGER + JWT =====================
             builder.Services.AddEndpointsApiExplorer();
@@ -197,5 +199,6 @@ namespace StudyMate_BE
             app.MapControllers();
             app.Run();
         }
+       
     }
 }

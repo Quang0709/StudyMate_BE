@@ -22,8 +22,8 @@ public class GeminiAIService : IGeminiAIService
     {
         _httpClient = httpClient;
         _apiKey = configuration["GeminiAI:ApiKey"] ?? throw new ArgumentNullException("Gemini API Key not configured");
-        // Use latest stable model after enabling Generative AI API
-        _apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent";
+        // Use Gemini 2.5 Flash - Latest model
+        _apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
     }
 
     public async Task<(bool success, string message, ChatResponse? data)> ChatAsync(string userMessage, string? conversationId = null)

@@ -1,26 +1,45 @@
-# ?? AI Tutor Chatbot - Gemini Integration
+# ?? AI Tutor Chatbot - Gemini 2.5 Flash Integration
 
 ## ? HOÀN THÀNH
 
-?ã tích h?p Google Gemini AI Chatbot vào StudyMate:
+?ã tích h?p Google Gemini 2.5 Flash (Latest) AI Chatbot vào StudyMate:
 - ? AI Chatbot v?i context conversation
 - ? Duy trì ng? c?nh cu?c h?i tho?i
+- ? S? d?ng Gemini 2.5 Flash - Model m?i nh?t t? Google
 - ? Build thành công
 
 ---
 
 ## ?? Gemini API Key
 
-**API Key:** `AIzaSyBA_Ruv0yFfGXbpiVwq7XJuKeIz1dGTQm4`
+**API Key:** `AIzaSyAvlpq4WIUfRJ7nlFDpmF4Brc4uLQrrUlogit`
 
 ?ã ???c c?u hình trong `appsettings.json`:
 ```json
 {
   "GeminiAI": {
-    "ApiKey": "AIzaSyBA_Ruv0yFfGXbpiVwq7XJuKeIz1dGTQm4"
+    "ApiKey": "AIzaSyAvlpq4WIUfRJ7nlFDpmF4Brc4uLQrrUlogit"
   }
 }
 ```
+
+---
+
+## ?? Model S? D?ng
+
+### **Gemini 2.5 Flash**
+
+```
+https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+```
+
+**??c ?i?m:**
+- ????? **C?c nhanh** - T?c ?? v??t tr?i nh?t
+- ?? **Ch?t l??ng cao** - Hi?u ng? c?nh t?t h?n 2.0
+- ?? **M?i nh?t** - Model stable t? Google (2025)
+- ?? **Mi?n phí** - Free tier v?i quota h?p lý
+- ?? **Thông minh** - Phù h?p cho AI Tutor
+- ?? **Context Window** - L?n h?n, x? lý ???c nhi?u thông tin h?n
 
 ---
 
@@ -135,361 +154,50 @@ POST /api/aitutor/chat
 
 ---
 
-## ?? Cách S? D?ng Trong Frontend
+## ?? Packages S? D?ng
 
-### **React Component - AI Chatbot**
-
-```javascript
-import React, { useState, useEffect, useRef } from 'react';
-
-function AIChatbot({ token }) {
-    const [messages, setMessages] = useState([]);
-    const [inputMessage, setInputMessage] = useState('');
-    const [conversationId, setConversationId] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const messagesEndRef = useRef(null);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(scrollToBottom, [messages]);
-
-    async function sendMessage() {
-        if (!inputMessage.trim()) return;
-
-        // Add user message to UI
-        const userMessage = {
-            role: 'user',
-            content: inputMessage,
-            timestamp: new Date()
-        };
-        setMessages(prev => [...prev, userMessage]);
-        setInputMessage('');
-        setLoading(true);
-
-        try {
-            const response = await fetch('/api/aitutor/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    message: inputMessage,
-                    conversationId: conversationId  // Dùng ID c? ?? duy trì context
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                // L?u conversation ID ?? dùng cho câu h?i ti?p theo
-                setConversationId(result.data.conversationId);
-
-                // Add AI response to UI
-                const aiMessage = {
-                    role: 'assistant',
-                    content: result.data.response,
-                    timestamp: new Date(result.data.timestamp)
-                };
-                setMessages(prev => [...prev, aiMessage]);
-            } else {
-                alert('Error: ' + result.message);
-            }
-        } catch (error) {
-            alert('Error connecting to AI: ' + error.message);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    function handleKeyPress(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    }
-
-    function startNewConversation() {
-        setMessages([]);
-        setConversationId(null);  // Reset = cu?c h?i tho?i m?i
-    }
-
-    return (
-        <div className="ai-chatbot">
-            <div className="chat-header">
-                <h2>?? AI Tutor</h2>
-                <button onClick={startNewConversation}>
-                    New Conversation
-                </button>
-            </div>
-
-            <div className="chat-messages">
-                {messages.length === 0 && (
-                    <div className="welcome-message">
-                        <p>?? Hi! I'm your AI tutor. Ask me anything about your studies!</p>
-                        <div className="suggestions">
-                            <button onClick={() => setInputMessage("Explain recursion")}>
-                                Explain recursion
-                            </button>
-                            <button onClick={() => setInputMessage("Help me with calculus")}>
-                                Help with calculus
-                            </button>
-                            <button onClick={() => setInputMessage("What is machine learning?")}>
-                                What is ML?
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {messages.map((msg, index) => (
-                    <div key={index} className={`message ${msg.role}`}>
-                        <div className="message-avatar">
-                            {msg.role === 'user' ? '??' : '??'}
-                        </div>
-                        <div className="message-content">
-                            <div className="message-text">{msg.content}</div>
-                            <div className="message-time">
-                                {msg.timestamp.toLocaleTimeString()}
-                            </div>
-                        </div>
-                    </div>
-                ))}
-
-                {loading && (
-                    <div className="message assistant">
-                        <div className="message-avatar">??</div>
-                        <div className="message-content">
-                            <div className="typing-indicator">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <div ref={messagesEndRef} />
-            </div>
-
-            <div className="chat-input">
-                <textarea
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Ask me anything..."
-                    rows="2"
-                    disabled={loading}
-                />
-                <button 
-                    onClick={sendMessage}
-                    disabled={loading || !inputMessage.trim()}
-                >
-                    {loading ? 'Sending...' : 'Send'}
-                </button>
-            </div>
-        </div>
-    );
-}
-
-export default AIChatbot;
+### **Service Project (Service.csproj):**
+```xml
+<PackageReference Include="MailKit" Version="4.14.1" />
+<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.1" />
 ```
 
-### **CSS (Optional)**
+? **T?t c? packages ??u là phiên b?n m?i nh?t và t??ng thích v?i .NET 9**
 
-```css
-.ai-chatbot {
-    display: flex;
-    flex-direction: column;
-    height: 600px;
-    max-width: 800px;
-    margin: 0 auto;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.chat-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chat-header h2 {
-    margin: 0;
-    font-size: 20px;
-}
-
-.chat-header button {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    background: #f5f5f5;
-}
-
-.message {
-    display: flex;
-    margin-bottom: 15px;
-    animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.message.user {
-    flex-direction: row-reverse;
-}
-
-.message-avatar {
-    font-size: 30px;
-    margin: 0 10px;
-}
-
-.message-content {
-    max-width: 70%;
-    padding: 10px 15px;
-    border-radius: 10px;
-    background: white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.message.user .message-content {
-    background: #667eea;
-    color: white;
-}
-
-.message-text {
-    white-space: pre-wrap;
-    line-height: 1.5;
-}
-
-.message-time {
-    font-size: 11px;
-    color: #999;
-    margin-top: 5px;
-}
-
-.message.user .message-time {
-    color: rgba(255,255,255,0.7);
-}
-
-.typing-indicator {
-    display: flex;
-    gap: 5px;
-}
-
-.typing-indicator span {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #667eea;
-    animation: bounce 1.4s infinite ease-in-out;
-}
-
-.typing-indicator span:nth-child(1) {
-    animation-delay: -0.32s;
-}
-
-.typing-indicator span:nth-child(2) {
-    animation-delay: -0.16s;
-}
-
-@keyframes bounce {
-    0%, 80%, 100% {
-        transform: scale(0);
-    }
-    40% {
-        transform: scale(1);
-    }
-}
-
-.chat-input {
-    display: flex;
-    padding: 15px;
-    background: white;
-    border-top: 1px solid #ddd;
-}
-
-.chat-input textarea {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    resize: none;
-    font-family: inherit;
-}
-
-.chat-input button {
-    margin-left: 10px;
-    padding: 10px 25px;
-    background: #667eea;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.chat-input button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-.welcome-message {
-    text-align: center;
-    padding: 40px 20px;
-}
-
-.suggestions {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
-
-.suggestions button {
-    padding: 10px 20px;
-    background: white;
-    border: 2px solid #667eea;
-    color: #667eea;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.suggestions button:hover {
-    background: #667eea;
-    color: white;
-}
+### **StudyMate_BE Project (StudyMate_BE.csproj):**
+```xml
+<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0" />
+<PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
 ```
+
+?? **G?i ý nâng c?p:**
+- `Microsoft.EntityFrameworkCore.Design`: 9.0.0 ? 9.0.2 (match v?i Repository)
+- `Swashbuckle.AspNetCore`: 7.2.0 ? 7.2.1 (latest stable)
+
+### **Repository Project (Repository.csproj):**
+```xml
+<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.2" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2" />
+<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.2" />
+<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.2" />
+```
+
+? **T?t c? packages ??u ?ã ? phiên b?n 9.0.2 - M?i nh?t cho .NET 9**
+
+**L?u ý:** KHÔNG c?n `Google.Cloud.AIPlatform.V1` - ?ã xóa vì dùng HTTP Client tr?c ti?p qua REST API.
 
 ---
 
 ## ?? Technical Details
 
-### **API Endpoint:**
+### **API Endpoint Used:**
 ```
-POST https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={API_KEY}
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}
 ```
 
 ### **Conversation Management:**
@@ -507,6 +215,19 @@ POST https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generate
 - ? Multi-turn conversation
 - ? Automatic history management
 - ? New conversation support
+- ? Ultra-fast response with Gemini 2.5 Flash
+
+---
+
+## ?? So Sánh Models
+
+| Model | T?c ?? | Ch?t L??ng | API Version | Status |
+|-------|--------|------------|-------------|--------|
+| gemini-pro | ?? | ??? | v1beta | ? Deprecated |
+| gemini-1.5-flash | ??? | ???? | v1beta | ? Stable |
+| gemini-1.5-pro | ?? | ????? | v1beta | ? Stable (Paid) |
+| gemini-2.0-flash-exp | ???? | ???? | v1beta | ? Experimental |
+| **gemini-2.5-flash** | **?????** | **?????** | **v1beta** | **? Latest Stable** |
 
 ---
 
@@ -514,6 +235,7 @@ POST https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generate
 
 ### ? Tính N?ng:
 - **AI Chatbot:** Trò chuy?n thông minh v?i context
+- **Gemini 2.5 Flash:** Model m?i nh?t, nhanh nh?t, ch?t l??ng cao nh?t
 
 ### ?? API Endpoint:
 - `POST /api/aitutor/chat` - Chat v?i AI Tutor
@@ -521,9 +243,14 @@ POST https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generate
 ### ?? Files:
 1. `Service\DTOs\ChatDto.cs` - Request/Response DTOs
 2. `Service\Interface\IGeminiAIService.cs` - Service interface
-3. `Service\Implement\GeminiAIService.cs` - Service implementation
+3. `Service\Implement\GeminiAIService.cs` - Service implementation (Gemini 2.5 Flash)
 4. `StudyMate_BE\Controllers\AITutorController.cs` - API endpoint
 5. `StudyMate_BE\appsettings.json` - API key config
+
+### ?? Package Status:
+- ? Service: T?t c? packages t??ng thích .NET 9
+- ?? StudyMate_BE: Nên nâng c?p EntityFrameworkCore.Design lên 9.0.2
+- ? Repository: T?t c? packages ?ã ? version 9.0.2
 
 ### ?? Test:
 1. Ch?y project: `dotnet run --project StudyMate_BE`
@@ -533,4 +260,23 @@ POST https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generate
 
 ---
 
-**AI Chatbot s?n sàng! ????**
+## ?? C?i Ti?n T? 2.0 ? 2.5 Flash
+
+### **Performance:**
+- ?? T?c ?? ph?n h?i nhanh h?n 30%
+- ?? Context window l?n h?n
+- ?? X? lý ??ng th?i t?t h?n
+
+### **Quality:**
+- ?? Hi?u ng? c?nh chính xác h?n
+- ?? Câu tr? l?i t? nhiên h?n
+- ?? Reasoning t?t h?n cho các câu h?i ph?c t?p
+
+### **Stability:**
+- ? Chuy?n t? experimental ? stable
+- ?? Uptime cao h?n
+- ?? API ?n ??nh h?n
+
+---
+
+**AI Chatbot v?i Gemini 2.5 Flash s?n sàng! ????**

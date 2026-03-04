@@ -14,4 +14,5 @@ public interface IPremiumPlanService
     Task<(bool success, string message, UserSubscriptionDto? data)> SubscribeToPlanAsync(int userId, string userRole, int planId);
     Task<(bool success, string message, UserSubscriptionDto? data)> GetActiveSubscriptionAsync(int userId, string userRole);
     Task<(bool success, string message)> CancelSubscriptionAsync(int userId, string userRole);
+    Task<(bool success, string message, PaymentLinkDto? data)> CreateSubscriptionPaymentAsync(int userId, string userRole, int planId);
 }

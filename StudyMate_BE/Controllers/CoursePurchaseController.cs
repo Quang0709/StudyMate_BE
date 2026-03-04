@@ -144,4 +144,33 @@ public class CoursePurchaseController : ControllerBase
             data
         });
     }
+
+    /// <summary>
+    /// T?o payment link PayOS ?? mua course (Students only)
+    /// </summary>
+    /// <remarks>
+    /// T?o link thanh toán qua PayOS. Sau khi thanh toán thành công,
+    /// PayOS s? g?i webhook v? /api/payment/webhook ?? hoàn t?t giao d?ch
+    /// và t? ??ng enroll student vào course.
+    /// 
+    /// Sample request:
+    /// {
+    ///     "courseId": 1
+    /// }
+    /// </remarks>
+    [HttpPost("create-payment")]
+    [Authorize(Roles = "student")]
+    public async Task<IActionResult> CreateCoursePayment([FromBody] CreateCoursePaymentDto dto)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            return Unauthorized(new { message = "Invalid token" });
+
+        var (success, message, data) = await _coursePurchaseService.CreateCoursePaymentAsync(userId, dto.CourseId);
+
+        if (!success)
+            return BadRequest(new { message });
+
+        return Ok(new { message, data });
+    }
 }

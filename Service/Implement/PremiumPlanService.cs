@@ -12,10 +12,12 @@ namespace Service.Implement;
 public class PremiumPlanService : IPremiumPlanService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IPayOSService _payOSService;
 
-    public PremiumPlanService(IUnitOfWork unitOfWork)
+    public PremiumPlanService(IUnitOfWork unitOfWork, IPayOSService payOSService)
     {
         _unitOfWork = unitOfWork;
+        _payOSService = payOSService;
     }
 
     public async Task<(bool success, string message, List<PremiumPlanDto>? data)> GetPlansByRoleAsync(string role)
@@ -333,6 +335,73 @@ public class PremiumPlanService : IPremiumPlanService
         catch (Exception ex)
         {
             return (false, $"Error cancelling subscription: {ex.Message}");
+        }
+    }
+
+    public async Task<(bool success, string message, PaymentLinkDto? data)> CreateSubscriptionPaymentAsync(int userId, string userRole, int planId)
+    {
+        try
+        {
+            if (userRole != "student" && userRole != "teacher")
+                return (false, "Invalid user role", null);
+
+            var plan = await _unitOfWork.PremiumPlans.GetByIdAsync(planId);
+            if (plan == null)
+                return (false, "Premium plan not found", null);
+
+            if (plan.TargetRole != userRole)
+                return (false, $"This plan is for {plan.TargetRole}, but you are a {userRole}", null);
+
+            if (plan.Price == null || plan.Price <= 0)
+                return (false, "This plan has no price configured", null);
+
+            // Ki?m tra ?ã có subscription active ch?a
+            if (userRole == "student")
+            {
+                var student = await _unitOfWork.Students.FirstOrDefaultAsync(s => s.UserId == userId);
+                if (student == null)
+                    return (false, "Student profile not found", null);
+
+                var existing = await _unitOfWork.UserSubscriptions.FirstOrDefaultAsync(
+                    s => s.StudentId == student.Id && s.IsActive);
+                if (existing != null)
+                    return (false, "You already have an active subscription. Please cancel it before subscribing to a new plan.", null);
+            }
+            else
+            {
+                var teacher = await _unitOfWork.Teachers.FirstOrDefaultAsync(t => t.UserId == userId);
+                if (teacher == null)
+                    return (false, "Teacher profile not found", null);
+
+                var existing = await _unitOfWork.UserSubscriptions.FirstOrDefaultAsync(
+                    s => s.TeacherId == teacher.Id && s.IsActive);
+                if (existing != null)
+                    return (false, "You already have an active subscription. Please cancel it before subscribing to a new plan.", null);
+            }
+
+            // Ki?m tra pending payment c?
+            var pendingOrder = await _unitOfWork.PaymentOrders.FirstOrDefaultAsync(
+                p => p.UserId == userId && p.OrderType == "subscription"
+                  && p.ReferenceId == planId && p.Status == "pending");
+            if (pendingOrder != null)
+            {
+                var (verifySuccess, _, payosStatus) = await _payOSService.VerifyPaymentAsync(pendingOrder.OrderCode);
+                if (!verifySuccess || payosStatus != "PENDING")
+                {
+                    pendingOrder.Status = "expired";
+                    _unitOfWork.PaymentOrders.Update(pendingOrder);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+            }
+
+            var description = $"Dang ky goi: {(plan.Name?.Length > 11 ? plan.Name[..11] : plan.Name)}";
+
+            return await _payOSService.CreatePaymentLinkAsync(
+                userId, "subscription", planId, plan.Price.Value, description);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error creating payment: {ex.Message}", null);
         }
     }
 }

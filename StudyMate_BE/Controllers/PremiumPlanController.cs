@@ -327,5 +327,38 @@ public class PremiumPlanController : ControllerBase
         return Ok(new { message });
     }
 
+    /// <summary>
+    /// T?o payment link PayOS ?? subscribe premium plan
+    /// </summary>
+    /// <remarks>
+    /// T?o link thanh toán qua PayOS. Sau khi thanh toán thành công,
+    /// PayOS s? g?i webhook v? /api/payment/webhook ?? kích ho?t subscription.
+    /// 
+    /// Sample request:
+    /// {
+    ///     "planId": 1
+    /// }
+    /// </remarks>
+    [HttpPost("create-payment")]
+    [Authorize]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> CreateSubscriptionPayment([FromBody] CreateSubscriptionPaymentDto dto)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value;
 
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            return Unauthorized(new { message = "Invalid token" });
+
+        if (string.IsNullOrEmpty(roleClaim))
+            return Unauthorized(new { message = "Invalid token - role not found" });
+
+        var (success, message, data) = await _premiumPlanService.CreateSubscriptionPaymentAsync(userId, roleClaim, dto.PlanId);
+
+        if (!success)
+            return BadRequest(new { message });
+
+        return Ok(new { message, data });
+    }
 }

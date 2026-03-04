@@ -33,6 +33,7 @@ public class UnitOfWork : IUnitOfWork
     private IGenericRepository<CourseSection>? _courseSections;
     private IGenericRepository<SectionMaterial>? _sectionMaterials;
     private IGenericRepository<PasswordResetCode>? _passwordResetCodes;
+    private IGenericRepository<PaymentOrder>? _paymentOrders;
 
     public UnitOfWork(StudyMateContext context)
     {
@@ -62,6 +63,7 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<CourseSection> CourseSections => _courseSections ??= new GenericRepository<CourseSection>(_context);
     public IGenericRepository<SectionMaterial> SectionMaterials => _sectionMaterials ??= new GenericRepository<SectionMaterial>(_context);
     public IGenericRepository<PasswordResetCode> PasswordResetCodes => _passwordResetCodes ??= new GenericRepository<PasswordResetCode>(_context);
+    public IGenericRepository<PaymentOrder> PaymentOrders => _paymentOrders ??= new GenericRepository<PaymentOrder>(_context);
 
     public async Task<int> SaveChangesAsync()
     {

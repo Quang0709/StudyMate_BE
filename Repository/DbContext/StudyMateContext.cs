@@ -61,6 +61,7 @@ public partial class StudyMateContext : DbContext
     public virtual DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
     public virtual DbSet<PasswordResetCode> PasswordResetCodes { get; set; }
     public virtual DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+    public virtual DbSet<PaymentOrder> PaymentOrders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -745,6 +746,47 @@ public partial class StudyMateContext : DbContext
                 .HasForeignKey(d => d.CourseId)
                 .OnDelete(DeleteBehavior.NoAction)
                 .HasConstraintName("FK_CoursePurchase_Course");
+        });
+
+        modelBuilder.Entity<PaymentOrder>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__payment_orders");
+
+            entity.ToTable("payment_orders");
+
+            entity.HasIndex(e => e.OrderCode, "UQ__payment_orders_order_code").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.OrderCode).HasColumnName("order_code");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.OrderType)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("order_type");
+            entity.Property(e => e.ReferenceId).HasColumnName("reference_id");
+            entity.Property(e => e.Amount)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("amount");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasDefaultValue("pending")
+                .HasColumnName("status");
+            entity.Property(e => e.PayOSTransactionId)
+                .HasMaxLength(100)
+                .HasColumnName("payos_transaction_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.PaidAt)
+                .HasColumnType("datetime")
+                .HasColumnName("paid_at");
+
+            entity.HasOne(d => d.User).WithMany(p => p.PaymentOrders)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PaymentOrder_User");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -42,6 +42,7 @@ namespace StudyMate_BE
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IPremiumPlanService, PremiumPlanService>();
             builder.Services.AddScoped<ICoursePurchaseService, CoursePurchaseService>();
+            builder.Services.AddScoped<IPayOSService, PayOSService>();
             builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
 
 

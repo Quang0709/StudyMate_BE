@@ -559,6 +559,73 @@ namespace Repository.Migrations
                     b.ToTable("password_reset_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("Repository.Model.PaymentOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<long>("OrderCode")
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_code");
+
+                    b.Property<string>("OrderType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("order_type");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("paid_at");
+
+                    b.Property<string>("PayOSTransactionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("payos_transaction_id");
+
+                    b.Property<int>("ReferenceId")
+                        .HasColumnType("int")
+                        .HasColumnName("reference_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("pending")
+                        .HasColumnName("status");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK__payment_orders");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex(new[] { "OrderCode" }, "UQ__payment_orders_order_code")
+                        .IsUnique();
+
+                    b.ToTable("payment_orders", (string)null);
+                });
+
             modelBuilder.Entity("Repository.Model.Post", b =>
                 {
                     b.Property<int>("Id")
@@ -1184,6 +1251,17 @@ namespace Repository.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("Repository.Model.PaymentOrder", b =>
+                {
+                    b.HasOne("Repository.Model.User", "User")
+                        .WithMany("PaymentOrders")
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("FK_PaymentOrder_User");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Repository.Model.Post", b =>
                 {
                     b.HasOne("Repository.Model.User", "Author")
@@ -1383,6 +1461,8 @@ namespace Repository.Migrations
             modelBuilder.Entity("Repository.Model.User", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("PaymentOrders");
 
                     b.Navigation("Posts");
 

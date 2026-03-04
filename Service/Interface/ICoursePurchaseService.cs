@@ -10,4 +10,5 @@ public interface ICoursePurchaseService
     Task<(bool success, string message, List<CoursePurchaseDto>? data)> GetMyPurchasedCoursesAsync(int userId);
     Task<(bool success, string message)> CheckCoursePurchasedAsync(int userId, int courseId);
     Task<(bool success, string message, MyPurchasedCoursesDto? data)> GetMyPurchasesSummaryAsync(int userId);
+    Task<(bool success, string message, PaymentLinkDto? data)> CreateCoursePaymentAsync(int userId, int courseId);
 }

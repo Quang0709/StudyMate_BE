@@ -29,6 +29,7 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<CourseSection> CourseSections { get; }
     IGenericRepository<SectionMaterial> SectionMaterials { get; }
     IGenericRepository<PasswordResetCode> PasswordResetCodes { get; }
-    
+    IGenericRepository<PaymentOrder> PaymentOrders { get; }
+
     Task<int> SaveChangesAsync();
 }

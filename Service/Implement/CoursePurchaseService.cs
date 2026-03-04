@@ -13,10 +13,12 @@ namespace Service.Implement;
 public class CoursePurchaseService : ICoursePurchaseService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IPayOSService _payOSService;
 
-    public CoursePurchaseService(IUnitOfWork unitOfWork)
+    public CoursePurchaseService(IUnitOfWork unitOfWork, IPayOSService payOSService)
     {
         _unitOfWork = unitOfWork;
+        _payOSService = payOSService;
     }
 
     public async Task<(bool success, string message, CoursePurchaseDto? data)> PurchaseCourseAsync(int userId, int courseId)
@@ -241,6 +243,66 @@ public class CoursePurchaseService : ICoursePurchaseService
         catch (Exception ex)
         {
             return (false, $"Error retrieving purchase summary: {ex.Message}", null);
+        }
+    }
+
+    public async Task<(bool success, string message, PaymentLinkDto? data)> CreateCoursePaymentAsync(int userId, int courseId)
+    {
+        try
+        {
+            var student = await _unitOfWork.Students.FirstOrDefaultAsync(s => s.UserId == userId);
+            if (student == null)
+                return (false, "Student profile not found. Only students can purchase courses.", null);
+
+            var course = await _unitOfWork.Courses.GetByIdAsync(courseId);
+            if (course == null)
+                return (false, "Course not found", null);
+
+            if (course.IsDeleted)
+                return (false, "This course is no longer available", null);
+
+            if (course.Status != "paid")
+                return (false, "This course is not available for purchase yet", null);
+
+            if (course.Price == null || course.Price <= 0)
+                return (false, "This course is free. You can enroll directly without purchasing.", null);
+
+            var existingPurchase = await _unitOfWork.CoursePurchases.FirstOrDefaultAsync(
+                cp => cp.StudentId == student.Id && cp.CourseId == courseId);
+            if (existingPurchase != null)
+                return (false, "You have already purchased this course", null);
+
+            // Ki?m tra xem ?ã có pending payment ch?a (tránh t?o nhi?u link)
+            var pendingOrder = await _unitOfWork.PaymentOrders.FirstOrDefaultAsync(
+                p => p.UserId == userId && p.OrderType == "course_purchase"
+                  && p.ReferenceId == courseId && p.Status == "pending");
+            if (pendingOrder != null)
+            {
+                // Verify v?i PayOS xem link c? còn valid không
+                var (verifySuccess, _, payosStatus) = await _payOSService.VerifyPaymentAsync(pendingOrder.OrderCode);
+                if (verifySuccess && payosStatus == "PENDING")
+                {
+                    // Link c? còn valid, t?o l?i link checkout t? orderCode c?
+                    var existingInfo = await _payOSService.VerifyPaymentAsync(pendingOrder.OrderCode);
+                    // Tr? v? thông báo yêu c?u dùng link c? - t?o link m?i
+                }
+                else
+                {
+                    // Link c? h?t h?n, ?ánh d?u expired
+                    pendingOrder.Status = "expired";
+                    _unitOfWork.PaymentOrders.Update(pendingOrder);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+            }
+
+            var description = $"Mua KH: {(course.Title?.Length > 17 ? course.Title[..17] : course.Title)}";
+
+            return await _payOSService.CreatePaymentLinkAsync(
+                userId, "course_purchase", courseId, course.Price.Value, description);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error creating payment: {ex.Message}", null);
         }
     }
 

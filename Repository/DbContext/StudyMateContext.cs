@@ -62,6 +62,7 @@ public partial class StudyMateContext : DbContext
     public virtual DbSet<PasswordResetCode> PasswordResetCodes { get; set; }
     public virtual DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public virtual DbSet<PaymentOrder> PaymentOrders { get; set; }
+    public virtual DbSet<Message> Messages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -274,6 +275,31 @@ public partial class StudyMateContext : DbContext
             entity.HasOne(d => d.Course).WithMany(p => p.Quizzes)
                 .HasForeignKey(d => d.CourseId)
                 .HasConstraintName("FK_Quiz_Course");
+        });
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.ToTable("messages");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Content)
+                .HasMaxLength(2000)
+                .IsRequired();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.HasOne(d => d.Sender)
+                .WithMany(p => p.SentMessages)
+                .HasForeignKey(d => d.SenderId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Message_Sender");
+
+            entity.HasOne(d => d.Receiver)
+                .WithMany(p => p.ReceivedMessages)
+                .HasForeignKey(d => d.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Message_Receiver");
         });
 
         modelBuilder.Entity<QuizQuestion>(entity =>

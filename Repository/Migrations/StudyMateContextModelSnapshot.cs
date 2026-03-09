@@ -420,6 +420,40 @@ namespace Repository.Migrations
                     b.ToTable("flashcards", (string)null);
                 });
 
+            modelBuilder.Entity("Repository.Model.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("messages", (string)null);
+                });
+
             modelBuilder.Entity("Repository.Model.OtpCode", b =>
                 {
                     b.Property<int>("Id")
@@ -1251,6 +1285,27 @@ namespace Repository.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("Repository.Model.Message", b =>
+                {
+                    b.HasOne("Repository.Model.User", "Receiver")
+                        .WithMany("ReceivedMessages")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_Message_Receiver");
+
+                    b.HasOne("Repository.Model.User", "Sender")
+                        .WithMany("SentMessages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_Message_Sender");
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("Repository.Model.PaymentOrder", b =>
                 {
                     b.HasOne("Repository.Model.User", "User")
@@ -1465,6 +1520,10 @@ namespace Repository.Migrations
                     b.Navigation("PaymentOrders");
 
                     b.Navigation("Posts");
+
+                    b.Navigation("ReceivedMessages");
+
+                    b.Navigation("SentMessages");
 
                     b.Navigation("Students");
 

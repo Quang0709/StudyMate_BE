@@ -186,7 +186,7 @@ public class AuthService : IAuthService
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+            ExpiresAt = DateTime.UtcNow.AddHours(5),  // ? C?p nh?t t? 15 phút lên 5 gi?
             User = userDto!
         };
 
@@ -236,7 +236,7 @@ public class AuthService : IAuthService
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+            ExpiresAt = DateTime.UtcNow.AddHours(5),  // ? C?p nh?t t? 15 phút lên 5 gi?
             User = userDto!
         };
 
@@ -293,7 +293,7 @@ public class AuthService : IAuthService
         {
             AccessToken = newAccessToken,
             RefreshToken = newRefreshToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+            ExpiresAt = DateTime.UtcNow.AddHours(5),  // ? C?p nh?t t? 15 phút lên 5 gi?
             User = userDto!
         };
 

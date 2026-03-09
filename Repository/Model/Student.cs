@@ -15,6 +15,8 @@ public partial class Student
 
     public virtual ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
 
+    public virtual ICollection<CoursePurchase> CoursePurchases { get; set; } = new List<CoursePurchase>();
+
     public virtual User User { get; set; } = null!;
 
     public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();

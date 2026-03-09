@@ -13,5 +13,7 @@ public partial class PremiumPlan
 
     public decimal? Price { get; set; }
 
+    public string? TargetRole { get; set; }  // "student" or "teacher"
+
     public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
 }

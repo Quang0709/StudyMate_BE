@@ -20,6 +20,10 @@ public partial class StudyMateContext : DbContext
 
     public virtual DbSet<Course> Courses { get; set; }
 
+    public virtual DbSet<CoursePurchase> CoursePurchases { get; set; }
+
+    public virtual DbSet<Category> Categories { get; set; }
+
     public virtual DbSet<CourseRating> CourseRatings { get; set; }
 
     public virtual DbSet<Enrollment> Enrollments { get; set; }
@@ -31,6 +35,14 @@ public partial class StudyMateContext : DbContext
     public virtual DbSet<PremiumPlan> PremiumPlans { get; set; }
 
     public virtual DbSet<Quiz> Quizzes { get; set; }
+
+    public virtual DbSet<QuizQuestion> QuizQuestions { get; set; }
+
+    public virtual DbSet<QuizOption> QuizOptions { get; set; }
+
+    public virtual DbSet<CourseSection> CourseSections { get; set; }
+
+    public virtual DbSet<SectionMaterial> SectionMaterials { get; set; }
 
     public virtual DbSet<Student> Students { get; set; }
 
@@ -49,6 +61,7 @@ public partial class StudyMateContext : DbContext
     public virtual DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
     public virtual DbSet<PasswordResetCode> PasswordResetCodes { get; set; }
     public virtual DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+    public virtual DbSet<PaymentOrder> PaymentOrders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -77,6 +90,19 @@ public partial class StudyMateContext : DbContext
                 .HasConstraintName("FK_Comment_Post");
         });
 
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__categories");
+
+            entity.ToTable("categories");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
+            entity.Property(e => e.Description).HasColumnName("description");
+        });
+
         modelBuilder.Entity<Course>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__courses__3213E83FB605C482");
@@ -84,10 +110,17 @@ public partial class StudyMateContext : DbContext
             entity.ToTable("courses");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.DeletedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("deleted_at");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.Price)
                 .HasDefaultValue(0m)
@@ -99,6 +132,9 @@ public partial class StudyMateContext : DbContext
                 .IsUnicode(false)
                 .HasDefaultValue("pending")
                 .HasColumnName("status");
+            entity.Property(e => e.IsDeleted)
+                .HasDefaultValue(false)
+                .HasColumnName("is_deleted");
             entity.Property(e => e.TeacherId).HasColumnName("teacher_id");
             entity.Property(e => e.Title)
                 .HasMaxLength(255)
@@ -108,6 +144,11 @@ public partial class StudyMateContext : DbContext
                 .HasForeignKey(d => d.TeacherId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Course_Teacher");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.Courses)
+                .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Course_Category");
         });
 
         modelBuilder.Entity<CourseRating>(entity =>
@@ -169,7 +210,8 @@ public partial class StudyMateContext : DbContext
             entity.ToTable("flashcards");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Content).HasColumnName("content");
+            entity.Property(e => e.Front).HasColumnName("front");
+            entity.Property(e => e.Back).HasColumnName("back");
             entity.Property(e => e.CourseId).HasColumnName("course_id");
 
             entity.HasOne(d => d.Course).WithMany(p => p.Flashcards)
@@ -211,6 +253,10 @@ public partial class StudyMateContext : DbContext
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("price");
+            entity.Property(e => e.TargetRole)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("target_role");
         });
 
         modelBuilder.Entity<Quiz>(entity =>
@@ -228,6 +274,106 @@ public partial class StudyMateContext : DbContext
             entity.HasOne(d => d.Course).WithMany(p => p.Quizzes)
                 .HasForeignKey(d => d.CourseId)
                 .HasConstraintName("FK_Quiz_Course");
+        });
+
+        modelBuilder.Entity<QuizQuestion>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__quiz_questions");
+
+            entity.ToTable("quiz_questions");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.QuizId).HasColumnName("quiz_id");
+            entity.Property(e => e.QuestionText).HasColumnName("question_text");
+            entity.Property(e => e.QuestionType)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("question_type");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.HasOne(d => d.Quiz).WithMany(p => p.QuizQuestions)
+                .HasForeignKey(d => d.QuizId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_QuizQuestion_Quiz");
+        });
+
+        modelBuilder.Entity<QuizOption>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__quiz_options");
+
+            entity.ToTable("quiz_options");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.QuestionId).HasColumnName("question_id");
+            entity.Property(e => e.OptionText).HasColumnName("option_text");
+            entity.Property(e => e.IsCorrect)
+                .HasDefaultValue(false)
+                .HasColumnName("is_correct");
+
+            entity.HasOne(d => d.Question).WithMany(p => p.QuizOptions)
+                .HasForeignKey(d => d.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_QuizOption_QuizQuestion");
+        });
+
+        modelBuilder.Entity<CourseSection>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__course_sections");
+
+            entity.ToTable("course_sections");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CourseId).HasColumnName("course_id");
+            entity.Property(e => e.Title)
+                .HasMaxLength(255)
+                .HasColumnName("title");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.OrderIndex).HasColumnName("order_index");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.HasOne(d => d.Course).WithMany(p => p.CourseSections)
+                .HasForeignKey(d => d.CourseId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_CourseSection_Course");
+        });
+
+        modelBuilder.Entity<SectionMaterial>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__section_materials");
+
+            entity.ToTable("section_materials");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.SectionId).HasColumnName("section_id");
+            entity.Property(e => e.Title)
+                .HasMaxLength(255)
+                .HasColumnName("title");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.MaterialType)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("material_type");
+            entity.Property(e => e.FileUrl).HasColumnName("file_url");
+            entity.Property(e => e.FileName)
+                .HasMaxLength(255)
+                .HasColumnName("file_name");
+            entity.Property(e => e.FileSize).HasColumnName("file_size");
+            entity.Property(e => e.OrderIndex).HasColumnName("order_index");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.HasOne(d => d.Section).WithMany(p => p.SectionMaterials)
+                .HasForeignKey(d => d.SectionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_SectionMaterial_CourseSection");
         });
 
         modelBuilder.Entity<Student>(entity =>
@@ -259,7 +405,6 @@ public partial class StudyMateContext : DbContext
             entity.HasIndex(e => e.TeacherIdCode, "UQ__teachers__6E31A32DBB74B00C").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Bio).HasColumnName("bio");
             entity.Property(e => e.TeacherIdCode)
                 .HasMaxLength(20)
                 .IsUnicode(false)
@@ -329,6 +474,17 @@ public partial class StudyMateContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("role");
+            entity.Property(e => e.Birthday)
+                .HasColumnType("date")
+                .HasColumnName("birthday");
+            entity.Property(e => e.Bio)
+                .HasColumnName("bio");
+            entity.Property(e => e.AvatarUrl)
+                .HasMaxLength(500)
+                .HasColumnName("avatar_url");
+            entity.Property(e => e.Address)
+                .HasMaxLength(500)
+                .HasColumnName("address");
         });
 
         modelBuilder.Entity<UserSubscription>(entity =>
@@ -338,15 +494,19 @@ public partial class StudyMateContext : DbContext
             entity.ToTable("user_subscriptions");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.EndDate)
-                .HasColumnType("datetime")
-                .HasColumnName("end_date");
+            entity.Property(e => e.StudentId).HasColumnName("student_id");
+            entity.Property(e => e.TeacherId).HasColumnName("teacher_id");
             entity.Property(e => e.PlanId).HasColumnName("plan_id");
             entity.Property(e => e.StartDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("start_date");
-            entity.Property(e => e.StudentId).HasColumnName("student_id");
+            entity.Property(e => e.EndDate)
+                .HasColumnType("datetime")
+                .HasColumnName("end_date");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
 
             entity.HasOne(d => d.Plan).WithMany(p => p.UserSubscriptions)
                 .HasForeignKey(d => d.PlanId)
@@ -355,8 +515,13 @@ public partial class StudyMateContext : DbContext
 
             entity.HasOne(d => d.Student).WithMany(p => p.UserSubscriptions)
                 .HasForeignKey(d => d.StudentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.NoAction)
                 .HasConstraintName("FK_Sub_Student");
+
+            entity.HasOne(d => d.Teacher).WithMany(p => p.UserSubscriptions)
+                .HasForeignKey(d => d.TeacherId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_Sub_Teacher");
         });
 
         modelBuilder.Entity<RefreshToken>(entity =>
@@ -516,6 +681,112 @@ public partial class StudyMateContext : DbContext
             entity.Property(e => e.IsUsed)
                 .HasDefaultValue(false)
                 .HasColumnName("is_used");
+        });
+
+        modelBuilder.Entity<CourseRating>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__course_r__3213E83FF292E4A6");
+
+            entity.ToTable("course_ratings");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Comment).HasColumnName("comment");
+            entity.Property(e => e.CourseId).HasColumnName("course_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Rating).HasColumnName("rating");
+            entity.Property(e => e.StudentId).HasColumnName("student_id");
+
+            entity.HasOne(d => d.Course).WithMany(p => p.CourseRatings)
+                .HasForeignKey(d => d.CourseId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Rate_Course");
+
+            entity.HasOne(d => d.Student).WithMany(p => p.CourseRatings)
+                .HasForeignKey(d => d.StudentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Rate_Student");
+        });
+
+        modelBuilder.Entity<CoursePurchase>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__course_purchases");
+
+            entity.ToTable("course_purchases");
+
+            entity.HasIndex(e => new { e.StudentId, e.CourseId }, "UQ__course_purchases_student_course").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.StudentId).HasColumnName("student_id");
+            entity.Property(e => e.CourseId).HasColumnName("course_id");
+            entity.Property(e => e.PurchasePrice)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("purchase_price");
+            entity.Property(e => e.PurchaseDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("purchase_date");
+            entity.Property(e => e.PaymentStatus)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasDefaultValue("completed")
+                .HasColumnName("payment_status");
+            entity.Property(e => e.TransactionId)
+                .HasMaxLength(100)
+                .HasColumnName("transaction_id");
+
+            entity.HasOne(d => d.Student).WithMany(p => p.CoursePurchases)
+                .HasForeignKey(d => d.StudentId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_CoursePurchase_Student");
+
+            entity.HasOne(d => d.Course).WithMany(p => p.CoursePurchases)
+                .HasForeignKey(d => d.CourseId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_CoursePurchase_Course");
+        });
+
+        modelBuilder.Entity<PaymentOrder>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__payment_orders");
+
+            entity.ToTable("payment_orders");
+
+            entity.HasIndex(e => e.OrderCode, "UQ__payment_orders_order_code").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.OrderCode).HasColumnName("order_code");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.OrderType)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("order_type");
+            entity.Property(e => e.ReferenceId).HasColumnName("reference_id");
+            entity.Property(e => e.Amount)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("amount");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasDefaultValue("pending")
+                .HasColumnName("status");
+            entity.Property(e => e.PayOSTransactionId)
+                .HasMaxLength(100)
+                .HasColumnName("payos_transaction_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.PaidAt)
+                .HasColumnType("datetime")
+                .HasColumnName("paid_at");
+
+            entity.HasOne(d => d.User).WithMany(p => p.PaymentOrders)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PaymentOrder_User");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -9,6 +9,8 @@ public partial class Course
 
     public int TeacherId { get; set; }
 
+    public int? CategoryId { get; set; }
+
     public string Title { get; set; } = null!;
 
     public string? Description { get; set; }
@@ -19,7 +21,13 @@ public partial class Course
 
     public string? RejectReason { get; set; }
 
+    public bool IsDeleted { get; set; }
+
     public DateTime? CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
 
     public virtual ICollection<CourseRating> CourseRatings { get; set; } = new List<CourseRating>();
 
@@ -28,6 +36,12 @@ public partial class Course
     public virtual ICollection<Flashcard> Flashcards { get; set; } = new List<Flashcard>();
 
     public virtual ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
+
+    public virtual ICollection<CourseSection> CourseSections { get; set; } = new List<CourseSection>();
+
+    public virtual ICollection<CoursePurchase> CoursePurchases { get; set; } = new List<CoursePurchase>();
+
+    public virtual Category? Category { get; set; }
 
     public virtual Teacher Teacher { get; set; } = null!;
 }

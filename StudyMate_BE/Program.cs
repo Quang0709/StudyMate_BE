@@ -3,11 +3,14 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Repository.Data;
 using Repository.Implement;
 using Repository.Interface;
 using Service.Implement;
 using Service.Interface;
+using Service.Interfaces;
+using Service.Services;
 using StudyMate_BE.BackgroundServices;
 
 namespace StudyMate_BE
@@ -18,84 +21,150 @@ namespace StudyMate_BE
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // 1. Cấu hình DbContext với tính năng tự động thử lại (EnableRetryOnFailure)
+            // ===================== DB CONTEXT =====================
             builder.Services.AddDbContext<StudyMateContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-                sqlServerOptionsAction: sqlOptions =>
-                {
-                    sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 10,
-                        maxRetryDelay: TimeSpan.FromSeconds(30),
-                        errorNumbersToAdd: null);
-                }));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection"),
+                    sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(10, TimeSpan.FromSeconds(30), null);
+                    }));
 
-            // Đăng ký các Service khác (giữ nguyên của bạn)
+            // ===================== DEPENDENCY INJECTION =====================
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+            builder.Services.AddScoped<ICourse2Service, Course2Service>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IPremiumPlanService, PremiumPlanService>();
+            builder.Services.AddScoped<ICoursePurchaseService, CoursePurchaseService>();
+            builder.Services.AddScoped<IPayOSService, PayOSService>();
+            builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
+
+
             builder.Services.AddHostedService<AdminSeederService>();
             builder.Services.AddHostedService<TokenCleanupService>();
+            builder.Services.AddHostedService<SubscriptionExpiryService>();
 
-            // Configure JWT (giữ nguyên của bạn)
+
+            builder.Services.AddScoped<IUserSubscriptionRepository, UserSubscriptionRepository>();
+            builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+            builder.Services.AddScoped<ICourse2Service, Course2Service>();
+
+            // ===================== JWT AUTH =====================
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["SecretKey"];
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                // ... (Phần cấu hình JwtBearerEvents giữ nguyên)
-                options.TokenValidationParameters = new TokenValidationParameters
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings["Issuer"],
-                    ValidAudience = jwtSettings["Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
-                    ClockSkew = TimeSpan.Zero
-                };
-            });
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtSettings["Issuer"],
+                        ValidAudience = jwtSettings["Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(secretKey!)
+                        ),
+                        ClockSkew = TimeSpan.Zero
+                    };
+
+                    // Custom event to accept token with or without "Bearer" prefix
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var authorizationHeader = context.Request.Headers["Authorization"].ToString();
+                            
+                            if (!string.IsNullOrEmpty(authorizationHeader))
+                            {
+                                // If token starts with "Bearer ", remove it
+                                if (authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    context.Token = authorizationHeader.Substring("Bearer ".Length).Trim();
+                                }
+                                // If it's just the token without "Bearer", use it directly
+                                else
+                                {
+                                    context.Token = authorizationHeader.Trim();
+                                }
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
 
             builder.Services.AddAuthorization();
+
+            // ===================== CORS =====================
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
                 {
-                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
                 });
             });
 
+            // ===================== CONTROLLERS =====================
             builder.Services.AddControllers();
+
+            // ===================== SWAGGER + JWT =====================
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c => { /* ... giữ nguyên cấu hình Swagger của bạn ... */ });
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "StudyMate API",
+                    Version = "v1"
+                });
+
+                // 🔐 JWT Bearer
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter: Bearer {your JWT token}"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
 
             var app = builder.Build();
 
-            // 2. TỰ ĐỘNG CHẠY MIGRATION KHI STARTUP
-            // Đoạn này sẽ tự tạo Database 'StudyMate' và các bảng nếu chúng chưa tồn tại
+            // ===================== AUTO MIGRATION =====================
             using (var scope = app.Services.CreateScope())
             {
-                var services = scope.ServiceProvider;
-                try
-                {
-                    var context = services.GetRequiredService<StudyMateContext>();
-                    Console.WriteLine("Checking database connectivity and applying migrations...");
-                    context.Database.Migrate();
-                    Console.WriteLine("Database is ready and migrations applied!");
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while migrating the database.");
-                }
+                var context = scope.ServiceProvider.GetRequiredService<StudyMateContext>();
+                context.Database.Migrate();
             }
 
-            // Global exception handler
+            // ===================== GLOBAL EXCEPTION =====================
             app.Use(async (context, next) =>
             {
                 try { await next(); }
@@ -106,26 +175,28 @@ namespace StudyMate_BE
                     await context.Response.WriteAsJsonAsync(new
                     {
                         message = "Internal Server Error",
-                        error = ex.Message,
-                        innerException = ex.InnerException?.Message
+                        error = ex.Message
                     });
                 }
             });
 
+            // ===================== MIDDLEWARE =====================
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c => {
+                app.UseSwaggerUI(c =>
+                {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "StudyMate API V1");
                     c.RoutePrefix = string.Empty;
                 });
             }
 
             app.UseCors("AllowAll");
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.MapControllers();
 
+            app.UseAuthentication(); // 🔥 PHẢI TRƯỚC
+            app.UseAuthorization();
+
+            app.MapControllers();
             app.Run();
         }
     }

@@ -17,6 +17,14 @@ public partial class User
 
     public bool? IsBanned { get; set; }
 
+    public DateTime? Birthday { get; set; }
+
+    public string? Bio { get; set; }
+
+    public string? AvatarUrl { get; set; }
+
+    public string? Address { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
@@ -28,4 +36,6 @@ public partial class User
     public virtual ICollection<Teacher> Teachers { get; set; } = new List<Teacher>();
 
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+
+    public virtual ICollection<PaymentOrder> PaymentOrders { get; set; } = new List<PaymentOrder>();
 }

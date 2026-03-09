@@ -40,7 +40,7 @@ public class TokenService : ITokenService
             issuer: issuer,
             audience: audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(15), // Access token expires in 15 minutes
+            expires: DateTime.UtcNow.AddHours(5), 
             signingCredentials: credentials
         );
 

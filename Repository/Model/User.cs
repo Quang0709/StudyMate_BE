@@ -38,4 +38,8 @@ public partial class User
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 
     public virtual ICollection<PaymentOrder> PaymentOrders { get; set; } = new List<PaymentOrder>();
+
+    public virtual ICollection<Message> SentMessages { get; set; } = new List<Message>();
+
+    public virtual ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
 }

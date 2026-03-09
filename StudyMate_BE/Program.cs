@@ -55,6 +55,9 @@ namespace StudyMate_BE
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<ICourse2Service, Course2Service>();
 
+            builder.Services.AddSignalR();
+            builder.Services.AddScoped<IChatService, ChatService>();
+            builder.Services.AddSignalR();
             // ===================== JWT AUTH =====================
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["SecretKey"];
@@ -195,7 +198,10 @@ namespace StudyMate_BE
 
             app.UseAuthentication(); // 🔥 PHẢI TRƯỚC
             app.UseAuthorization();
+            //  SIGNALR HUB
+        
 
+            app.MapHub<ChatHub>("/chatHub");
             app.MapControllers();
             app.Run();
         }

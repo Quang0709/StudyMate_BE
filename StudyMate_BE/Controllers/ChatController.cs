@@ -10,6 +10,12 @@ public class ChatController : ControllerBase
     {
         _chatService = chatService;
     }
+    [HttpPost("send")]
+    public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request)
+    {
+        var message = await _chatService.SendMessageAsync(request.SenderId, request);
+        return Ok(message);
+    }
 
     [HttpGet("conversation")]
     public async Task<IActionResult> GetConversation(int user1, int user2)

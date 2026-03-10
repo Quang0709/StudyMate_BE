@@ -23,6 +23,7 @@ public class UnitOfWork : IUnitOfWork
     private IGenericRepository<CoursePurchase>? _coursePurchases;
     private IGenericRepository<Post>? _posts;
     private IGenericRepository<Comment>? _comments;
+    private IGenericRepository<PostLike>? _postLikes;
     private IGenericRepository<Transaction>? _transactions;
     private IGenericRepository<PremiumPlan>? _premiumPlans;
     private IGenericRepository<UserSubscription>? _userSubscriptions;
@@ -53,6 +54,7 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<CoursePurchase> CoursePurchases => _coursePurchases ??= new GenericRepository<CoursePurchase>(_context);
     public IGenericRepository<Post> Posts => _posts ??= new GenericRepository<Post>(_context);
     public IGenericRepository<Comment> Comments => _comments ??= new GenericRepository<Comment>(_context);
+    public IGenericRepository<PostLike> PostLikes => _postLikes ??= new GenericRepository<PostLike>(_context);
     public IGenericRepository<Transaction> Transactions => _transactions ??= new GenericRepository<Transaction>(_context);
     public IGenericRepository<PremiumPlan> PremiumPlans => _premiumPlans ??= new GenericRepository<PremiumPlan>(_context);
     public IGenericRepository<UserSubscription> UserSubscriptions => _userSubscriptions ??= new GenericRepository<UserSubscription>(_context);

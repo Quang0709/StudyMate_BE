@@ -2,7 +2,11 @@
 {
     Task<MessageResponse> SendMessageAsync(int senderId, SendMessageRequest request);
 
-    Task<List<MessageResponse>> GetConversationAsync(int user1, int user2);
+    Task<List<MessageResponse>> GetConversationAsync(int userId, int otherUserId);
 
-    Task MarkAsReadAsync(Guid messageId);
+    Task<List<ConversationSummary>> GetConversationListAsync(int userId);
+
+    Task MarkAsReadAsync(int userId, int otherUserId);
+
+    Task<List<UserSearchResultDto>> SearchUsersForChatAsync(int currentUserId, string keyword);
 }

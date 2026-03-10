@@ -63,6 +63,7 @@ public partial class StudyMateContext : DbContext
     public virtual DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public virtual DbSet<PaymentOrder> PaymentOrders { get; set; }
     public virtual DbSet<Message> Messages { get; set; }
+    public virtual DbSet<PostLike> PostLikes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,10 +76,16 @@ public partial class StudyMateContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AuthorId).HasColumnName("author_id");
             entity.Property(e => e.Content).HasColumnName("content");
+            entity.Property(e => e.IsDeleted)
+                .HasDefaultValue(false)
+                .HasColumnName("is_deleted");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
             entity.Property(e => e.PostId).HasColumnName("post_id");
 
             entity.HasOne(d => d.Author).WithMany(p => p.Comments)
@@ -228,16 +235,55 @@ public partial class StudyMateContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AuthorId).HasColumnName("author_id");
+            entity.Property(e => e.Title)
+                .HasMaxLength(255)
+                .HasColumnName("title");
             entity.Property(e => e.Content).HasColumnName("content");
+            entity.Property(e => e.ImageUrl)
+                .HasMaxLength(500)
+                .HasColumnName("image_url");
+            entity.Property(e => e.IsDeleted)
+                .HasDefaultValue(false)
+                .HasColumnName("is_deleted");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
 
             entity.HasOne(d => d.Author).WithMany(p => p.Posts)
                 .HasForeignKey(d => d.AuthorId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Post_User");
+        });
+
+        modelBuilder.Entity<PostLike>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__post_likes");
+
+            entity.ToTable("post_likes");
+
+            entity.HasIndex(e => new { e.PostId, e.UserId }, "UQ__post_likes_post_user").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.PostId).HasColumnName("post_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.HasOne(d => d.Post).WithMany(p => p.PostLikes)
+                .HasForeignKey(d => d.PostId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_PostLike_Post");
+
+            entity.HasOne(d => d.User).WithMany(p => p.PostLikes)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PostLike_User");
         });
 
         modelBuilder.Entity<PremiumPlan>(entity =>

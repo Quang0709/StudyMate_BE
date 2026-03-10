@@ -70,9 +70,19 @@ namespace Repository.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
                     b.Property<int>("PostId")
                         .HasColumnType("int")
                         .HasColumnName("post_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
 
                     b.HasKey("Id")
                         .HasName("PK__comments__3213E83F3E22E7D1");
@@ -683,12 +693,66 @@ namespace Repository.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("image_url");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
                     b.HasKey("Id")
                         .HasName("PK__posts__3213E83F0E6F997F");
 
                     b.HasIndex("AuthorId");
 
                     b.ToTable("posts", (string)null);
+                });
+
+            modelBuilder.Entity("Repository.Model.PostLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("int")
+                        .HasColumnName("post_id");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK__post_likes");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex(new[] { "PostId", "UserId" }, "UQ__post_likes_post_user")
+                        .IsUnique();
+
+                    b.ToTable("post_likes", (string)null);
                 });
 
             modelBuilder.Entity("Repository.Model.PremiumPlan", b =>
@@ -1328,6 +1392,26 @@ namespace Repository.Migrations
                     b.Navigation("Author");
                 });
 
+            modelBuilder.Entity("Repository.Model.PostLike", b =>
+                {
+                    b.HasOne("Repository.Model.Post", "Post")
+                        .WithMany("PostLikes")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PostLike_Post");
+
+                    b.HasOne("Repository.Model.User", "User")
+                        .WithMany("PostLikes")
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("FK_PostLike_User");
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Repository.Model.Quiz", b =>
                 {
                     b.HasOne("Repository.Model.Course", "Course")
@@ -1478,6 +1562,8 @@ namespace Repository.Migrations
             modelBuilder.Entity("Repository.Model.Post", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("PostLikes");
                 });
 
             modelBuilder.Entity("Repository.Model.PremiumPlan", b =>
@@ -1518,6 +1604,8 @@ namespace Repository.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("PaymentOrders");
+
+                    b.Navigation("PostLikes");
 
                     b.Navigation("Posts");
 

@@ -20,4 +20,17 @@ public interface IPayOSService
     /// Xác nh?n tr?ng thái payment v?i PayOS (dùng ?? verify sau khi returnUrl callback)
     /// </summary>
     Task<(bool success, string message, string? status)> VerifyPaymentAsync(long orderCode);
+
+    // ===================== ADMIN =====================
+
+    Task<PaymentOrderListDto> GetPaymentOrdersAsync(PaymentFilterDto filter);
+
+    Task<PaymentOrderDetailDto?> GetPaymentOrderByIdAsync(int id);
+
+    Task<RevenueSummaryDto> GetRevenueSummaryAsync(int? year = null);
+
+    /// <summary>
+    /// Ch? ??ng g?i PayOS API ?? ??ng b? tr?ng thái các ??n pending trong DB
+    /// </summary>
+    Task<SyncPaymentResultDto> SyncPaymentStatusAsync();
 }

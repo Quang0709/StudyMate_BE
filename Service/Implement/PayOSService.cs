@@ -9,6 +9,7 @@ using Service.DTOs;
 using Service.Interface;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Service.Implement;
@@ -184,6 +185,226 @@ public class PayOSService : IPayOSService
         {
             return (false, $"Error verifying payment: {ex.Message}", null);
         }
+    }
+
+    public async Task<SyncPaymentResultDto> SyncPaymentStatusAsync()
+    {
+        var result = new SyncPaymentResultDto();
+
+        // Sync c? pending, cancelled, expired — b? qua paid ?ã xong
+        var ordersToCheck = (await _unitOfWork.PaymentOrders.FindAsync(
+            o => o.Status == "pending" || o.Status == "cancelled" || o.Status == "expired")).ToList();
+
+        result.TotalChecked = ordersToCheck.Count;
+
+        foreach (var order in ordersToCheck)
+        {
+            try
+            {
+                var paymentLinkInfo = await _payOSClient.PaymentRequests.GetAsync(order.OrderCode);
+                var payosStatus = paymentLinkInfo.Status.ToString().ToUpper();
+
+                if (payosStatus == "PAID")
+                {
+                    var previousStatus = order.Status;
+                    order.Status = "paid";
+                    order.PaidAt = order.PaidAt ?? DateTime.UtcNow;
+
+                    var transactions = paymentLinkInfo.Transactions;
+                    if (transactions != null && transactions.Count > 0)
+                        order.PayOSTransactionId = transactions[0].Reference;
+
+                    _unitOfWork.PaymentOrders.Update(order);
+
+                    if (order.OrderType == "course_purchase")
+                        await CompleteCoursePaymentAsync(order);
+                    else if (order.OrderType == "subscription")
+                        await CompleteSubscriptionPaymentAsync(order);
+
+                    result.UpdatedToPaid++;
+                    result.Details.Add($"OrderCode {order.OrderCode}: {previousStatus} ? paid");
+                }
+                else if (payosStatus == "CANCELLED" && order.Status != "cancelled")
+                {
+                    var previousStatus = order.Status;
+                    order.Status = "cancelled";
+                    _unitOfWork.PaymentOrders.Update(order);
+                    result.UpdatedToCancelled++;
+                    result.Details.Add($"OrderCode {order.OrderCode}: {previousStatus} ? cancelled");
+                }
+                else if (payosStatus == "EXPIRED" && order.Status != "expired")
+                {
+                    var previousStatus = order.Status;
+                    order.Status = "expired";
+                    _unitOfWork.PaymentOrders.Update(order);
+                    result.UpdatedToExpired++;
+                    result.Details.Add($"OrderCode {order.OrderCode}: {previousStatus} ? expired");
+                }
+                else
+                {
+                    result.Details.Add($"OrderCode {order.OrderCode}: no change (PayOS={payosStatus}, DB={order.Status})");
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Details.Add($"OrderCode {order.OrderCode}: error - {ex.Message}");
+            }
+        }
+
+        if (result.UpdatedToPaid + result.UpdatedToCancelled + result.UpdatedToExpired > 0)
+            await _unitOfWork.SaveChangesAsync();
+
+        return result;
+    }
+
+    public async Task<PaymentOrderListDto> GetPaymentOrdersAsync(PaymentFilterDto filter)
+    {
+        var allOrders = (await _unitOfWork.PaymentOrders.GetAllAsync()).ToList();
+        var allUsers = (await _unitOfWork.Users.GetAllAsync()).ToList();
+
+        var query = allOrders.Join(allUsers,
+            o => o.UserId,
+            u => u.Id,
+            (o, u) => new PaymentOrderDetailDto
+            {
+                Id = o.Id,
+                OrderCode = o.OrderCode,
+                UserId = o.UserId,
+                UserEmail = u.Email,
+                UserFullName = u.FullName,
+                OrderType = o.OrderType,
+                ReferenceId = o.ReferenceId,
+                Amount = o.Amount,
+                Status = o.Status,
+                PayOSTransactionId = o.PayOSTransactionId,
+                CreatedAt = o.CreatedAt,
+                PaidAt = o.PaidAt
+            }).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filter.Status))
+            query = query.Where(x => x.Status == filter.Status);
+
+        if (!string.IsNullOrWhiteSpace(filter.OrderType))
+            query = query.Where(x => x.OrderType == filter.OrderType);
+
+        if (filter.FromDate.HasValue)
+            query = query.Where(x => x.CreatedAt >= filter.FromDate.Value);
+
+        if (filter.ToDate.HasValue)
+            query = query.Where(x => x.CreatedAt <= filter.ToDate.Value.AddDays(1));
+
+        if (!string.IsNullOrWhiteSpace(filter.SearchKeyword))
+        {
+            var kw = filter.SearchKeyword.ToLower();
+            query = query.Where(x =>
+                x.UserEmail.ToLower().Contains(kw) ||
+                x.UserFullName.ToLower().Contains(kw) ||
+                x.OrderCode.ToString().Contains(kw));
+        }
+
+        query = query.OrderByDescending(x => x.CreatedAt);
+
+        var totalCount = query.Count();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
+
+        var items = query
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToList();
+
+        return new PaymentOrderListDto
+        {
+            Items = items,
+            TotalCount = totalCount,
+            Page = filter.Page,
+            PageSize = filter.PageSize,
+            TotalPages = totalPages
+        };
+    }
+
+    public async Task<PaymentOrderDetailDto?> GetPaymentOrderByIdAsync(int id)
+    {
+        var order = await _unitOfWork.PaymentOrders.FirstOrDefaultAsync(o => o.Id == id);
+        if (order == null) return null;
+
+        var user = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Id == order.UserId);
+        if (user == null) return null;
+
+        return new PaymentOrderDetailDto
+        {
+            Id = order.Id,
+            OrderCode = order.OrderCode,
+            UserId = order.UserId,
+            UserEmail = user.Email,
+            UserFullName = user.FullName,
+            OrderType = order.OrderType,
+            ReferenceId = order.ReferenceId,
+            Amount = order.Amount,
+            Status = order.Status,
+            PayOSTransactionId = order.PayOSTransactionId,
+            CreatedAt = order.CreatedAt,
+            PaidAt = order.PaidAt
+        };
+    }
+
+    public async Task<RevenueSummaryDto> GetRevenueSummaryAsync(int? year = null)
+    {
+        var targetYear = year ?? DateTime.UtcNow.Year;
+        var allOrders = (await _unitOfWork.PaymentOrders.GetAllAsync()).ToList();
+        var allPaid = allOrders.Where(o => o.Status == "paid").ToList();
+
+        var now = DateTime.UtcNow;
+        var thisMonthStart = new DateTime(now.Year, now.Month, 1);
+        var lastMonthStart = thisMonthStart.AddMonths(-1);
+        var lastMonthEnd = thisMonthStart.AddTicks(-1);
+
+        var revenueThisMonth = allPaid
+            .Where(o => o.PaidAt >= thisMonthStart)
+            .Sum(o => o.Amount);
+
+        var revenueLastMonth = allPaid
+            .Where(o => o.PaidAt >= lastMonthStart && o.PaidAt <= lastMonthEnd)
+            .Sum(o => o.Amount);
+
+        var growthPercent = revenueLastMonth == 0
+            ? (revenueThisMonth > 0 ? 100m : 0m)
+            : Math.Round((revenueThisMonth - revenueLastMonth) / revenueLastMonth * 100, 2);
+
+        var revenueByMonth = allPaid
+            .Where(o => o.PaidAt.HasValue && o.PaidAt.Value.Year == targetYear)
+            .GroupBy(o => new { o.PaidAt!.Value.Year, o.PaidAt.Value.Month })
+            .Select(g => new RevenueByMonthDto
+            {
+                Year = g.Key.Year,
+                Month = g.Key.Month,
+                TotalRevenue = g.Sum(o => o.Amount),
+                TransactionCount = g.Count()
+            })
+            .OrderBy(x => x.Month)
+            .ToList();
+
+        var revenueByType = allPaid
+            .GroupBy(o => o.OrderType)
+            .Select(g => new RevenueByTypeDto
+            {
+                OrderType = g.Key,
+                TotalRevenue = g.Sum(o => o.Amount),
+                TransactionCount = g.Count()
+            })
+            .ToList();
+
+        return new RevenueSummaryDto
+        {
+            TotalRevenue = allPaid.Sum(o => o.Amount),
+            RevenueThisMonth = revenueThisMonth,
+            RevenueLastMonth = revenueLastMonth,
+            MonthOverMonthGrowthPercent = growthPercent,
+            TotalTransactions = allOrders.Count,
+            PaidTransactions = allPaid.Count,
+            PendingTransactions = allOrders.Count(o => o.Status == "pending"),
+            RevenueByMonth = revenueByMonth,
+            RevenueByType = revenueByType
+        };
     }
 
     // ===================== PRIVATE HELPERS =====================

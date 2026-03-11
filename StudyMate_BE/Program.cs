@@ -76,7 +76,9 @@ namespace StudyMate_BE
                         IssuerSigningKey = new SymmetricSecurityKey(
                             Encoding.UTF8.GetBytes(secretKey!)
                         ),
-                        ClockSkew = TimeSpan.Zero
+                        ClockSkew = TimeSpan.Zero,
+                        RoleClaimType = ClaimTypes.Role,
+                        NameClaimType = ClaimTypes.NameIdentifier
                     };
 
                     // Custom event to accept token with or without "Bearer" prefix

@@ -41,7 +41,6 @@ namespace StudyMate_BE
             builder.Services.AddScoped<ICourse2Service, Course2Service>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IPremiumPlanService, PremiumPlanService>();
-            builder.Services.AddScoped<ICoursePurchaseService, CoursePurchaseService>();
             builder.Services.AddScoped<IPayOSService, PayOSService>();
             builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
 
@@ -55,9 +54,6 @@ namespace StudyMate_BE
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<ICourse2Service, Course2Service>();
 
-            builder.Services.AddSignalR();
-            builder.Services.AddScoped<IChatService, ChatService>();
-            builder.Services.AddScoped<IBlogService, BlogService>();
             // ===================== JWT AUTH =====================
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["SecretKey"];
@@ -76,34 +72,24 @@ namespace StudyMate_BE
                         IssuerSigningKey = new SymmetricSecurityKey(
                             Encoding.UTF8.GetBytes(secretKey!)
                         ),
-                        ClockSkew = TimeSpan.Zero,
-                        RoleClaimType = ClaimTypes.Role,
-                        NameClaimType = ClaimTypes.NameIdentifier
+                        ClockSkew = TimeSpan.Zero
                     };
 
                     // Custom event to accept token with or without "Bearer" prefix
-                    // Also supports SignalR token via query string (?access_token=...)
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
                         {
-                            // SignalR passes token via query string
-                            var accessToken = context.Request.Query["access_token"].ToString();
-                            var path = context.HttpContext.Request.Path;
-                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
-                            {
-                                context.Token = accessToken;
-                                return Task.CompletedTask;
-                            }
-
                             var authorizationHeader = context.Request.Headers["Authorization"].ToString();
-
+                            
                             if (!string.IsNullOrEmpty(authorizationHeader))
                             {
+                                // If token starts with "Bearer ", remove it
                                 if (authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                                 {
                                     context.Token = authorizationHeader.Substring("Bearer ".Length).Trim();
                                 }
+                                // If it's just the token without "Bearer", use it directly
                                 else
                                 {
                                     context.Token = authorizationHeader.Trim();
@@ -115,7 +101,13 @@ namespace StudyMate_BE
                     };
                 });
 
-            builder.Services.AddAuthorization();
+            builder.Services.AddAuthorization(options =>
+            {
+                // ← ADD ADMIN POLICY
+                options.AddPolicy("AdminOnly", policy =>
+                    policy.RequireClaim(ClaimTypes.Role, "admin")
+                );
+            });
 
             // ===================== CORS =====================
             builder.Services.AddCors(options =>
@@ -208,10 +200,7 @@ namespace StudyMate_BE
 
             app.UseAuthentication(); // 🔥 PHẢI TRƯỚC
             app.UseAuthorization();
-            //  SIGNALR HUB
-        
 
-            app.MapHub<ChatHub>("/chatHub");
             app.MapControllers();
             app.Run();
         }

@@ -13,4 +13,5 @@ public interface IAuthService
     Task<UserDto?> GetUserByIdAsync(int userId);
     Task<(bool Success, string Message)> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
     Task<(bool Success, string Message)> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
+    Task<(bool Success, string Message)> UpgradeToTeacherAsync(int studentUserId);
 }

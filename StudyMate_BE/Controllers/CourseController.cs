@@ -128,7 +128,6 @@ public class CourseController : ControllerBase
     ///     {
     ///         "title": "Introduction to Programming",
     ///         "description": "Learn the basics of programming",
-    ///         "price": 99.99,
     ///         "sections": [
     ///             {
     ///                 "title": "Section 1: Getting Started",
@@ -232,7 +231,6 @@ public class CourseController : ControllerBase
     ///     {
     ///         "title": "Updated Course Title",
     ///         "description": "Updated description",
-    ///         "price": 149.99,
     ///         "categoryId": 2,
     ///         "sections": [
     ///             {

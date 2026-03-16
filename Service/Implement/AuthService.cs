@@ -52,14 +52,14 @@ public class AuthService : IAuthService
         // Hash password
         var hashedPassword = HashPassword(registerDto.Password);
 
-        // Save verification token to database
+        // Save verification token to database (always register as student)
         var emailVerification = new EmailVerificationToken
         {
             Email = registerDto.Email,
             Token = verificationToken,
             FullName = registerDto.FullName,
             Password = hashedPassword,
-            Role = registerDto.Role.ToLower(),
+            Role = "student",  // ? Always register as student
             ExpiryDate = DateTime.UtcNow.AddHours(24),
             CreatedAt = DateTime.UtcNow,
             IsVerified = false
@@ -128,7 +128,7 @@ public class AuthService : IAuthService
             Email = verificationToken.Email,
             Password = verificationToken.Password,
             FullName = verificationToken.FullName,
-            Role = verificationToken.Role,
+            Role = verificationToken.Role,  // Always "student" for new registrations
             IsBanned = false,
             CreatedAt = DateTime.UtcNow
         };
@@ -136,25 +136,13 @@ public class AuthService : IAuthService
         await _unitOfWork.Users.AddAsync(user);
         await _unitOfWork.SaveChangesAsync();
 
-        // Create Student or Teacher profile
-        if (verificationToken.Role == "student")
+        // Create Student profile (always create student for new registrations)
+        var student = new Student
         {
-            var student = new Student
-            {
-                UserId = user.Id,
-                StudentIdCode = GenerateStudentCode()
-            };
-            await _unitOfWork.Students.AddAsync(student);
-        }
-        else if (verificationToken.Role == "teacher")
-        {
-            var teacher = new Teacher
-            {
-                UserId = user.Id,
-                TeacherIdCode = GenerateTeacherCode()
-            };
-            await _unitOfWork.Teachers.AddAsync(teacher);
-        }
+            UserId = user.Id,
+            StudentIdCode = GenerateStudentCode()
+        };
+        await _unitOfWork.Students.AddAsync(student);
 
         // Mark token as verified
         verificationToken.IsVerified = true;
@@ -186,7 +174,7 @@ public class AuthService : IAuthService
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-            ExpiresAt = DateTime.UtcNow.AddHours(5),  // ? C?p nh?t t? 15 phút lên 5 gi?
+            ExpiresAt = DateTime.UtcNow.AddHours(5),
             User = userDto!
         };
 
@@ -236,7 +224,7 @@ public class AuthService : IAuthService
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-            ExpiresAt = DateTime.UtcNow.AddHours(5),  // ? C?p nh?t t? 15 phút lên 5 gi?
+            ExpiresAt = DateTime.UtcNow.AddHours(5),
             User = userDto!
         };
 
@@ -293,7 +281,7 @@ public class AuthService : IAuthService
         {
             AccessToken = newAccessToken,
             RefreshToken = newRefreshToken,
-            ExpiresAt = DateTime.UtcNow.AddHours(5),  // ? C?p nh?t t? 15 phút lên 5 gi?
+            ExpiresAt = DateTime.UtcNow.AddHours(5),
             User = userDto!
         };
 
@@ -320,6 +308,48 @@ public class AuthService : IAuthService
     public async Task<UserDto?> GetUserByIdAsync(int userId)
     {
         return await GetUserDtoAsync(userId);
+    }
+
+    /// <summary>
+    /// Admin upgrades a student to teacher
+    /// </summary>
+    public async Task<(bool Success, string Message)> UpgradeToTeacherAsync(int studentUserId)
+    {
+        // Check if user exists
+        var user = await _unitOfWork.Users.GetByIdAsync(studentUserId);
+        if (user == null)
+        {
+            return (false, "User not found");
+        }
+
+        // Check if user is a student
+        if (user.Role != "student")
+        {
+            return (false, "User is not a student. Only students can be upgraded to teacher.");
+        }
+
+        // Check if student already has a teacher profile
+        var existingTeacher = await _unitOfWork.Teachers.FirstOrDefaultAsync(t => t.UserId == studentUserId);
+        if (existingTeacher != null)
+        {
+            return (false, "User is already a teacher");
+        }
+
+        // Update user role to teacher
+        user.Role = "teacher";
+        _unitOfWork.Users.Update(user);
+
+        // Create teacher profile
+        var teacher = new Teacher
+        {
+            UserId = studentUserId,
+            TeacherIdCode = GenerateTeacherCode()
+        };
+        await _unitOfWork.Teachers.AddAsync(teacher);
+
+        await _unitOfWork.SaveChangesAsync();
+
+        return (true, $"User {user.Email} has been successfully upgraded to teacher");
     }
 
     private async Task<UserDto?> GetUserDtoAsync(int userId)

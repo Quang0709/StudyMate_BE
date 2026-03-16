@@ -20,8 +20,6 @@ public partial class StudyMateContext : DbContext
 
     public virtual DbSet<Course> Courses { get; set; }
 
-    public virtual DbSet<CoursePurchase> CoursePurchases { get; set; }
-
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<CourseRating> CourseRatings { get; set; }
@@ -130,10 +128,6 @@ public partial class StudyMateContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("deleted_at");
             entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.Price)
-                .HasDefaultValue(0m)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("price");
             entity.Property(e => e.RejectReason).HasColumnName("reject_reason");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
@@ -780,44 +774,6 @@ public partial class StudyMateContext : DbContext
                 .HasForeignKey(d => d.StudentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Rate_Student");
-        });
-
-        modelBuilder.Entity<CoursePurchase>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__course_purchases");
-
-            entity.ToTable("course_purchases");
-
-            entity.HasIndex(e => new { e.StudentId, e.CourseId }, "UQ__course_purchases_student_course").IsUnique();
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.StudentId).HasColumnName("student_id");
-            entity.Property(e => e.CourseId).HasColumnName("course_id");
-            entity.Property(e => e.PurchasePrice)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("purchase_price");
-            entity.Property(e => e.PurchaseDate)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("purchase_date");
-            entity.Property(e => e.PaymentStatus)
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasDefaultValue("completed")
-                .HasColumnName("payment_status");
-            entity.Property(e => e.TransactionId)
-                .HasMaxLength(100)
-                .HasColumnName("transaction_id");
-
-            entity.HasOne(d => d.Student).WithMany(p => p.CoursePurchases)
-                .HasForeignKey(d => d.StudentId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_CoursePurchase_Student");
-
-            entity.HasOne(d => d.Course).WithMany(p => p.CoursePurchases)
-                .HasForeignKey(d => d.CourseId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_CoursePurchase_Course");
         });
 
         modelBuilder.Entity<PaymentOrder>(entity =>

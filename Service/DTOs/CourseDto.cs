@@ -12,9 +12,6 @@ public class CreateCourseDto
     [StringLength(2000, ErrorMessage = "Description cannot exceed 2000 characters")]
     public string? Description { get; set; }
 
-    [Range(0, double.MaxValue, ErrorMessage = "Price must be a positive number")]
-    public decimal? Price { get; set; }
-
     public int? CategoryId { get; set; }
 
     public List<CreateCourseSectionDto>? Sections { get; set; }
@@ -32,9 +29,6 @@ public class UpdateCourseDto
 
     [StringLength(2000, ErrorMessage = "Description cannot exceed 2000 characters")]
     public string? Description { get; set; }
-
-    [Range(0, double.MaxValue, ErrorMessage = "Price must be a positive number")]
-    public decimal? Price { get; set; }
 
     public int? CategoryId { get; set; }
 

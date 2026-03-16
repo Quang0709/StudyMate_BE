@@ -74,9 +74,8 @@ public class CourseService : ICourseService
                 TeacherId = teacher.Id, // Use teacher.Id instead of userId
                 Title = createCourseDto.Title,
                 Description = createCourseDto.Description,
-                Price = createCourseDto.Price ?? 0,
                 CategoryId = createCourseDto.CategoryId,
-                Status = "pending",
+                Status = "paid",
                 IsDeleted = false,
                 CreatedAt = DateTime.UtcNow
             };
@@ -312,7 +311,6 @@ public class CourseService : ICourseService
                     Id = course.Id,
                     Title = course.Title,
                     Description = course.Description,
-                    Price = course.Price ?? 0,
                     Status = course.Status ?? "pending",
                     RejectReason = course.RejectReason,
                     IsDeleted = course.IsDeleted,
@@ -456,7 +454,6 @@ public class CourseService : ICourseService
                 Id = course.Id,
                 Title = course.Title,
                 Description = course.Description,
-                Price = course.Price ?? 0,
                 Status = course.Status ?? "pending",
                 RejectReason = course.RejectReason,
                 IsDeleted = course.IsDeleted,
@@ -557,7 +554,6 @@ public class CourseService : ICourseService
             // Update course basic info
             course.Title = updateCourseDto.Title;
             course.Description = updateCourseDto.Description;
-            course.Price = updateCourseDto.Price ?? 0;
             course.CategoryId = updateCourseDto.CategoryId;
             course.UpdatedAt = DateTime.UtcNow;
 
@@ -991,7 +987,7 @@ public class CourseService : ICourseService
     {
         try
         {
-            // Get all paid courses that are not deleted
+            // Get all courses with "paid" status that are not deleted
             var allCourses = await _unitOfWork.Courses.GetAllAsync();
             var publicCourses = allCourses
                 .Where(c => c.Status == "paid" && !c.IsDeleted)
@@ -1047,7 +1043,6 @@ public class CourseService : ICourseService
                     Id = course.Id,
                     Title = course.Title,
                     Description = course.Description,
-                    Price = course.Price ?? 0,
                     CategoryName = category?.Name,
                     TeacherName = teacherUser?.FullName,
                     TeacherAvatar = teacherUser?.AvatarUrl,

@@ -20,7 +20,6 @@ public class UnitOfWork : IUnitOfWork
     private IGenericRepository<Course>? _courses;
     private IGenericRepository<Enrollment>? _enrollments;
     private IGenericRepository<CourseRating>? _courseRatings;
-    private IGenericRepository<CoursePurchase>? _coursePurchases;
     private IGenericRepository<Post>? _posts;
     private IGenericRepository<Comment>? _comments;
     private IGenericRepository<PostLike>? _postLikes;
@@ -51,7 +50,6 @@ public class UnitOfWork : IUnitOfWork
     public IGenericRepository<Course> Courses => _courses ??= new GenericRepository<Course>(_context);
     public IGenericRepository<Enrollment> Enrollments => _enrollments ??= new GenericRepository<Enrollment>(_context);
     public IGenericRepository<CourseRating> CourseRatings => _courseRatings ??= new GenericRepository<CourseRating>(_context);
-    public IGenericRepository<CoursePurchase> CoursePurchases => _coursePurchases ??= new GenericRepository<CoursePurchase>(_context);
     public IGenericRepository<Post> Posts => _posts ??= new GenericRepository<Post>(_context);
     public IGenericRepository<Comment> Comments => _comments ??= new GenericRepository<Comment>(_context);
     public IGenericRepository<PostLike> PostLikes => _postLikes ??= new GenericRepository<PostLike>(_context);

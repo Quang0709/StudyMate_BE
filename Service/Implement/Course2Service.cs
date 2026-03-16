@@ -2,6 +2,8 @@
 using Repository.Model;
 using Service.DTOs;
 using Service.Interface;
+using System;
+using System.Threading.Tasks;
 
 namespace Service.Implement;
 
@@ -9,13 +11,16 @@ public class Course2Service : ICourse2Service
 {
     private readonly ICourseRepository _courseRepository;
     private readonly ISubscriptionService _subscriptionService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public Course2Service(
         ICourseRepository courseRepository,
-        ISubscriptionService subscriptionService)
+        ISubscriptionService subscriptionService,
+        IUnitOfWork unitOfWork)
     {
         _courseRepository = courseRepository;
         _subscriptionService = subscriptionService;
+        _unitOfWork = unitOfWork;
     }
 
     // ===== SEARCH =====
@@ -24,16 +29,13 @@ public class Course2Service : ICourse2Service
         var courses = await _courseRepository.SearchAsync(
             dto.Title,
             dto.CategoryId,
-            dto.TeacherName,
-            dto.MinPrice,
-            dto.MaxPrice
+            dto.TeacherName
         );
 
         return courses.Select(c => new CourseSearchResultDto
         {
             Id = c.Id,
             Title = c.Title,
-            Price = c.Price,
             CategoryName = c.Category?.Name,
             TeacherFullName = c.Teacher.User.FullName
         }).ToList();
@@ -73,13 +75,36 @@ public class Course2Service : ICourse2Service
         if (course == null || course.IsDeleted)
             return (false, "Course not found");
 
+        // Get all students
+        var students = await _unitOfWork.Students.GetAllAsync();
+        var student = students.FirstOrDefault(s => s.UserId == userId);
+        if (student == null)
+            return (false, "Student profile not found");
+
+        // Check if already enrolled
+        var enrollments = await _unitOfWork.Enrollments.GetAllAsync();
+        var existingEnrollment = enrollments.FirstOrDefault(e => e.StudentId == student.Id && e.CourseId == courseId);
+        if (existingEnrollment != null)
+            return (false, "You are already enrolled in this course");
+
         var hasPremium = await _subscriptionService
             .HasActiveSubscriptionAsync(userId, role);
 
         if (!hasPremium)
-            return (false, "Your premium package has expired");
+            return (false, "You need an active premium subscription to enroll in courses");
 
-        return (true, "Enroll successfully");
+        // Create enrollment
+        var enrollment = new Enrollment
+        {
+            StudentId = student.Id,
+            CourseId = courseId,
+            EnrolledAt = DateTime.UtcNow
+        };
+
+        await _unitOfWork.Enrollments.AddAsync(enrollment);
+        await _unitOfWork.SaveChangesAsync();
+
+        return (true, "Enrolled in course successfully");
     }
 
 

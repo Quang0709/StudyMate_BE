@@ -15,8 +15,10 @@ public class RegisterDto
     [Required(ErrorMessage = "Password is required")]
     [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters")]
     public string Password { get; set; } = null!;
+}
 
-    [Required(ErrorMessage = "Role is required")]
-    [RegularExpression("^(student|teacher)$", ErrorMessage = "Role must be either 'student' or 'teacher'")]
-    public string Role { get; set; } = null!;
+public class UpgradeToTeacherDto
+{
+    [Required(ErrorMessage = "Student ID is required")]
+    public int StudentUserId { get; set; }
 }

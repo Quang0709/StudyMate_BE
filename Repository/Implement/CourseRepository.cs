@@ -17,9 +17,7 @@ public class CourseRepository : ICourseRepository
     public async Task<List<Course>> SearchAsync(
         string? title,
         int? categoryId,
-        string? teacherName,
-        decimal? minPrice,
-        decimal? maxPrice)
+        string? teacherName)
     {
         IQueryable<Course> query = _context.Courses
             .Include(c => c.Category)
@@ -36,12 +34,6 @@ public class CourseRepository : ICourseRepository
         if (!string.IsNullOrWhiteSpace(teacherName))
             query = query.Where(c =>
                 c.Teacher.User.FullName.Contains(teacherName));
-
-        if (minPrice.HasValue)
-            query = query.Where(c => c.Price >= minPrice);
-
-        if (maxPrice.HasValue)
-            query = query.Where(c => c.Price <= maxPrice);
 
         return await query.ToListAsync();
     }

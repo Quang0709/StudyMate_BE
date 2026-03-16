@@ -18,7 +18,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Register a new user (Student or Teacher)
+    /// Register a new student account
     /// </summary>
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
@@ -253,7 +253,7 @@ public class AuthController : ControllerBase
             <p>{message}</p>
         </div>
         
-        <p>Your account has been activated and you can now log in to StudyMate.</p>
+        <p>Your student account has been activated and you can now log in to StudyMate.</p>
         
         <div class='instruction'>
             <p><strong>Next Step:</strong> Use the Login API with your email and password to get your access token.</p>
@@ -407,6 +407,28 @@ public class AuthController : ControllerBase
             message = "User retrieved successfully",
             data = user
         });
+    }
+
+    /// <summary>
+    /// Admin: Upgrade a student to teacher
+    /// </summary>
+    [Authorize(Policy = "AdminOnly")]
+    [HttpPost("upgrade-to-teacher")]
+    public async Task<IActionResult> UpgradeToTeacher([FromBody] UpgradeToTeacherDto upgradeDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var (success, message) = await _authService.UpgradeToTeacherAsync(upgradeDto.StudentUserId);
+
+        if (!success)
+        {
+            return BadRequest(new { message });
+        }
+
+        return Ok(new { message });
     }
 
     /// <summary>

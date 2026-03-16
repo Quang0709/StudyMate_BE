@@ -155,11 +155,7 @@ public class PayOSService : IPayOSService
             _unitOfWork.PaymentOrders.Update(paymentOrder);
 
             // X? lý logic nghi?p v? t??ng ?ng
-            if (paymentOrder.OrderType == "course_purchase")
-            {
-                await CompleteCoursePaymentAsync(paymentOrder);
-            }
-            else if (paymentOrder.OrderType == "subscription")
+            if (paymentOrder.OrderType == "subscription")
             {
                 await CompleteSubscriptionPaymentAsync(paymentOrder);
             }
@@ -216,9 +212,7 @@ public class PayOSService : IPayOSService
 
                     _unitOfWork.PaymentOrders.Update(order);
 
-                    if (order.OrderType == "course_purchase")
-                        await CompleteCoursePaymentAsync(order);
-                    else if (order.OrderType == "subscription")
+                    if (order.OrderType == "subscription")
                         await CompleteSubscriptionPaymentAsync(order);
 
                     result.UpdatedToPaid++;
@@ -408,46 +402,6 @@ public class PayOSService : IPayOSService
     }
 
     // ===================== PRIVATE HELPERS =====================
-
-    private async Task CompleteCoursePaymentAsync(PaymentOrder paymentOrder)
-    {
-        var courseId = paymentOrder.ReferenceId;
-
-        var student = await _unitOfWork.Students.FirstOrDefaultAsync(s => s.UserId == paymentOrder.UserId);
-        if (student == null) return;
-
-        // Ki?m tra ch?a mua (idempotency)
-        var existingPurchase = await _unitOfWork.CoursePurchases.FirstOrDefaultAsync(
-            cp => cp.StudentId == student.Id && cp.CourseId == courseId);
-        if (existingPurchase != null) return;
-
-        var course = await _unitOfWork.Courses.GetByIdAsync(courseId);
-        if (course == null) return;
-
-        // T?o CoursePurchase v?i status completed
-        await _unitOfWork.CoursePurchases.AddAsync(new CoursePurchase
-        {
-            StudentId = student.Id,
-            CourseId = courseId,
-            PurchasePrice = paymentOrder.Amount,
-            PurchaseDate = DateTime.UtcNow,
-            PaymentStatus = "completed",
-            TransactionId = paymentOrder.PayOSTransactionId ?? paymentOrder.OrderCode.ToString()
-        });
-
-        // T? ??ng enroll student vào course
-        var existingEnrollment = await _unitOfWork.Enrollments.FirstOrDefaultAsync(
-            e => e.StudentId == student.Id && e.CourseId == courseId);
-        if (existingEnrollment == null)
-        {
-            await _unitOfWork.Enrollments.AddAsync(new Enrollment
-            {
-                StudentId = student.Id,
-                CourseId = courseId,
-                EnrolledAt = DateTime.UtcNow
-            });
-        }
-    }
 
     private async Task CompleteSubscriptionPaymentAsync(PaymentOrder paymentOrder)
     {

@@ -27,7 +27,7 @@ public class BlogController : ControllerBase
     // ==================== POST ENDPOINTS ====================
 
     /// <summary>
-    /// T?o bài vi?t blog m?i. Yêu c?u ??ng nh?p.
+    /// T?o bï¿½i vi?t blog m?i. Yï¿½u c?u ??ng nh?p.
     /// </summary>
     [Authorize]
     [HttpPost("posts")]
@@ -48,8 +48,8 @@ public class BlogController : ControllerBase
     }
 
     /// <summary>
-    /// L?y danh sách t?t c? bài vi?t (phân trang). Không c?n ??ng nh?p,
-    /// nh?ng n?u có token thì s? tr? v? tr?ng thái like c?a ng??i dùng hi?n t?i.
+    /// L?y danh sï¿½ch t?t c? bï¿½i vi?t (phï¿½n trang). Khï¿½ng c?n ??ng nh?p,
+    /// nh?ng n?u cï¿½ token thï¿½ s? tr? v? tr?ng thï¿½i like c?a ng??i dï¿½ng hi?n t?i.
     /// </summary>
     [HttpGet("posts")]
     public async Task<IActionResult> GetAllPosts([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
@@ -58,15 +58,15 @@ public class BlogController : ControllerBase
         if (pageSize < 1 || pageSize > 50) pageSize = 10;
 
         var currentUserId = GetCurrentUserId();
-        var (success, message, data) = await _blogService.GetAllPostsAsync(currentUserId, page, pageSize);
+        var (success, message, totalCount, data) = await _blogService.GetAllPostsAsync(currentUserId, page, pageSize);
         if (!success)
             return BadRequest(new { message });
 
-        return Ok(new { message, page, pageSize, count = data?.Count ?? 0, data });
+        return Ok(new { message, page, pageSize, count = totalCount, data });
     }
 
     /// <summary>
-    /// L?y chi ti?t m?t bài vi?t theo ID.
+    /// L?y chi ti?t m?t bï¿½i vi?t theo ID.
     /// </summary>
     [HttpGet("posts/{postId:int}")]
     public async Task<IActionResult> GetPostById(int postId)
@@ -80,7 +80,7 @@ public class BlogController : ControllerBase
     }
 
     /// <summary>
-    /// L?y t?t c? bài vi?t c?a m?t user c? th?.
+    /// L?y t?t c? bï¿½i vi?t c?a m?t user c? th?.
     /// </summary>
     [HttpGet("users/{userId:int}/posts")]
     public async Task<IActionResult> GetPostsByUser(int userId)
@@ -94,7 +94,7 @@ public class BlogController : ControllerBase
     }
 
     /// <summary>
-    /// C?p nh?t bài vi?t. Ch? tác gi? m?i ???c phép ch?nh s?a.
+    /// C?p nh?t bï¿½i vi?t. Ch? tï¿½c gi? m?i ???c phï¿½p ch?nh s?a.
     /// </summary>
     [Authorize]
     [HttpPut("posts/{postId:int}")]
@@ -119,7 +119,7 @@ public class BlogController : ControllerBase
     }
 
     /// <summary>
-    /// Xoá bài vi?t (soft delete). Tác gi? ho?c admin m?i ???c phép.
+    /// Xoï¿½ bï¿½i vi?t (soft delete). Tï¿½c gi? ho?c admin m?i ???c phï¿½p.
     /// </summary>
     [Authorize]
     [HttpDelete("posts/{postId:int}")]
@@ -143,7 +143,7 @@ public class BlogController : ControllerBase
     // ==================== LIKE ENDPOINTS ====================
 
     /// <summary>
-    /// Like ho?c unlike bài vi?t. N?u ?ã like thì s? unlike và ng??c l?i.
+    /// Like ho?c unlike bï¿½i vi?t. N?u ?ï¿½ like thï¿½ s? unlike vï¿½ ng??c l?i.
     /// </summary>
     [Authorize]
     [HttpPost("posts/{postId:int}/like")]
@@ -163,7 +163,7 @@ public class BlogController : ControllerBase
     // ==================== COMMENT ENDPOINTS ====================
 
     /// <summary>
-    /// Thêm bình lu?n vào bài vi?t. Yêu c?u ??ng nh?p.
+    /// Thï¿½m bï¿½nh lu?n vï¿½o bï¿½i vi?t. Yï¿½u c?u ??ng nh?p.
     /// </summary>
     [Authorize]
     [HttpPost("posts/{postId:int}/comments")]
@@ -184,7 +184,7 @@ public class BlogController : ControllerBase
     }
 
     /// <summary>
-    /// L?y danh sách bình lu?n c?a m?t bài vi?t.
+    /// L?y danh sï¿½ch bï¿½nh lu?n c?a m?t bï¿½i vi?t.
     /// </summary>
     [HttpGet("posts/{postId:int}/comments")]
     public async Task<IActionResult> GetComments(int postId)

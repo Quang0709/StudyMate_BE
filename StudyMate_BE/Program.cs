@@ -43,6 +43,8 @@ namespace StudyMate_BE
             builder.Services.AddScoped<IPremiumPlanService, PremiumPlanService>();
             builder.Services.AddScoped<IPayOSService, PayOSService>();
             builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
+            builder.Services.AddScoped<IBlogService, BlogService>();
+            builder.Services.AddScoped<IChatService, ChatService>();
 
 
             builder.Services.AddHostedService<AdminSeederService>();
@@ -122,6 +124,7 @@ namespace StudyMate_BE
 
             // ===================== CONTROLLERS =====================
             builder.Services.AddControllers();
+            builder.Services.AddSignalR();
 
             // ===================== SWAGGER + JWT =====================
             builder.Services.AddEndpointsApiExplorer();
@@ -202,6 +205,7 @@ namespace StudyMate_BE
             app.UseAuthorization();
 
             app.MapControllers();
+            app.MapHub<ChatHub>("/hub/chat");
             app.Run();
         }
     }

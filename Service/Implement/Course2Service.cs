@@ -67,7 +67,9 @@ public class Course2Service : ICourse2Service
     public async Task<(bool success, string message)>
         EnrollCourseAsync(int courseId, int userId, string role)
     {
-        if (role != "STUDENT")
+        var normalizedRole = role?.Trim().ToLower();
+
+        if (normalizedRole != "student")
             return (false, "Only student can enroll");
 
         var course = await _courseRepository.GetByIdAsync(courseId);
@@ -88,7 +90,7 @@ public class Course2Service : ICourse2Service
             return (false, "You are already enrolled in this course");
 
         var hasPremium = await _subscriptionService
-            .HasActiveSubscriptionAsync(userId, role);
+            .HasActiveSubscriptionAsync(userId, normalizedRole!);
 
         if (!hasPremium)
             return (false, "You need an active premium subscription to enroll in courses");
@@ -105,6 +107,28 @@ public class Course2Service : ICourse2Service
         await _unitOfWork.SaveChangesAsync();
 
         return (true, "Enrolled in course successfully");
+    }
+
+    public async Task<(bool success, bool isEnrolled, string message)> GetEnrollmentStatusAsync(int courseId, int userId, string role)
+    {
+        var normalizedRole = role?.Trim().ToLower();
+
+        if (normalizedRole != "student")
+            return (false, false, "Only student enrollment status is supported");
+
+        var course = await _courseRepository.GetByIdAsync(courseId);
+        if (course == null || course.IsDeleted)
+            return (false, false, "Course not found");
+
+        var students = await _unitOfWork.Students.GetAllAsync();
+        var student = students.FirstOrDefault(s => s.UserId == userId);
+        if (student == null)
+            return (false, false, "Student profile not found");
+
+        var enrollments = await _unitOfWork.Enrollments.GetAllAsync();
+        var isEnrolled = enrollments.Any(e => e.StudentId == student.Id && e.CourseId == courseId);
+
+        return (true, isEnrolled, "Enrollment status retrieved successfully");
     }
 
 

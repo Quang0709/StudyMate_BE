@@ -28,7 +28,7 @@ public class CourseStudentController : ControllerBase
     [HttpGet("all")]
     public async Task<IActionResult> GetAllCourses()
     {
-        var dto = new SearchCourseDto(); // không filter = l?y t?t c?
+        var dto = new SearchCourseDto(); // khï¿½ng filter = l?y t?t c?
         var result = await _courseService.SearchAsync(dto);
 
         return Ok(result);
@@ -41,7 +41,10 @@ public class CourseStudentController : ControllerBase
     public async Task<IActionResult> Enroll(int courseId)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var role = User.FindFirstValue(ClaimTypes.Role)!;
+        var role = User.FindFirstValue(ClaimTypes.Role)?.Trim().ToLower();
+
+        if (string.IsNullOrEmpty(role))
+            return Unauthorized("Invalid user role");
 
         var hasPremium = await _subscriptionService
             .HasActiveSubscriptionAsync(userId, role);
@@ -56,5 +59,26 @@ public class CourseStudentController : ControllerBase
             return BadRequest(result.message);
 
         return Ok("Enroll successfully");
+    }
+
+    [HttpGet("{courseId}/enrollment-status")]
+    public async Task<IActionResult> GetEnrollmentStatus(int courseId)
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var role = User.FindFirstValue(ClaimTypes.Role)?.Trim().ToLower();
+
+        if (string.IsNullOrEmpty(role))
+            return Unauthorized("Invalid user role");
+
+        var result = await _courseService.GetEnrollmentStatusAsync(courseId, userId, role);
+
+        if (!result.success)
+            return BadRequest(new { message = result.message });
+
+        return Ok(new
+        {
+            isEnrolled = result.isEnrolled,
+            message = result.message
+        });
     }
 }

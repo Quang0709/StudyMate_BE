@@ -9,7 +9,7 @@ public interface IBlogService
     // Post
     Task<(bool success, string message, PostResponseDto? data)> CreatePostAsync(int authorId, CreatePostDto dto);
     Task<(bool success, string message, PostResponseDto? data)> GetPostByIdAsync(int postId, int? currentUserId);
-    Task<(bool success, string message, List<PostResponseDto>? data)> GetAllPostsAsync(int? currentUserId, int page, int pageSize);
+    Task<(bool success, string message, int totalCount, List<PostResponseDto>? data)> GetAllPostsAsync(int? currentUserId, int page, int pageSize);
     Task<(bool success, string message, List<PostResponseDto>? data)> GetPostsByUserAsync(int userId, int? currentUserId);
     Task<(bool success, string message, PostResponseDto? data)> UpdatePostAsync(int postId, int currentUserId, UpdatePostDto dto);
     Task<(bool success, string message)> DeletePostAsync(int postId, int currentUserId);

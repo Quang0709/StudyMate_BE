@@ -481,6 +481,145 @@ public class CourseService : ICourseService
         }
     }
 
+    public async Task<(bool Success, string Message, CourseResponseDto? Data)> GetPublicCourseDetailAsync(int courseId)
+    {
+        try
+        {
+            var course = await _unitOfWork.Courses.GetByIdAsync(courseId);
+
+            if (course == null || course.IsDeleted || course.Status != "paid")
+            {
+                return (false, "Course not found", null);
+            }
+
+            var categories = await _unitOfWork.Categories.GetAllAsync();
+            var category = categories.FirstOrDefault(cat => cat.Id == course.CategoryId);
+
+            var sections = await _unitOfWork.CourseSections.GetAllAsync();
+            var courseSections = sections.Where(s => s.CourseId == course.Id).OrderBy(s => s.OrderIndex).ToList();
+
+            var materials = await _unitOfWork.SectionMaterials.GetAllAsync();
+            var quizzes = await _unitOfWork.Quizzes.GetAllAsync();
+            var courseQuizzes = quizzes.Where(q => q.CourseId == course.Id).ToList();
+
+            var questions = await _unitOfWork.QuizQuestions.GetAllAsync();
+            var options = await _unitOfWork.QuizOptions.GetAllAsync();
+
+            var flashcards = await _unitOfWork.Flashcards.GetAllAsync();
+            var courseFlashcards = flashcards.Where(f => f.CourseId == course.Id).ToList();
+
+            var enrollments = await _unitOfWork.Enrollments.GetAllAsync();
+            var courseEnrollments = enrollments.Where(e => e.CourseId == course.Id).ToList();
+
+            var teachers = await _unitOfWork.Teachers.GetAllAsync();
+            var users = await _unitOfWork.Users.GetAllAsync();
+            var ratings = await _unitOfWork.CourseRatings.GetAllAsync();
+
+            var teacher = teachers.FirstOrDefault(t => t.Id == course.TeacherId);
+            var teacherUser = teacher != null ? users.FirstOrDefault(u => u.Id == teacher.UserId) : null;
+
+            var courseRatings = ratings.Where(r => r.CourseId == course.Id).ToList();
+            var averageRating = courseRatings.Any() ? courseRatings.Average(r => r.Rating ?? 0) : 0;
+
+            var sectionDtos = new List<CourseSectionDto>();
+            var totalMaterials = 0;
+
+            foreach (var section in courseSections)
+            {
+                var sectionMaterials = materials.Where(m => m.SectionId == section.Id).OrderBy(m => m.OrderIndex).ToList();
+                totalMaterials += sectionMaterials.Count;
+
+                sectionDtos.Add(new CourseSectionDto
+                {
+                    Id = section.Id,
+                    Title = section.Title,
+                    Description = section.Description,
+                    OrderIndex = section.OrderIndex,
+                    CreatedAt = section.CreatedAt,
+                    Materials = sectionMaterials.Select(m => new SectionMaterialDto
+                    {
+                        Id = m.Id,
+                        Title = m.Title,
+                        Description = m.Description,
+                        MaterialType = m.MaterialType,
+                        FileUrl = m.FileUrl,
+                        FileName = m.FileName,
+                        FileSize = m.FileSize,
+                        OrderIndex = m.OrderIndex
+                    }).ToList()
+                });
+            }
+
+            var quizDtos = new List<QuizDto>();
+            var totalQuestions = 0;
+
+            foreach (var quiz in courseQuizzes)
+            {
+                var quizQuestions = questions.Where(q => q.QuizId == quiz.Id).ToList();
+                totalQuestions += quizQuestions.Count;
+
+                quizDtos.Add(new QuizDto
+                {
+                    Id = quiz.Id,
+                    Title = quiz.Title,
+                    Questions = quizQuestions.Select(q => new QuizQuestionDto
+                    {
+                        Id = q.Id,
+                        QuestionText = q.QuestionText,
+                        QuestionType = q.QuestionType,
+                        Options = options.Where(o => o.QuestionId == q.Id).Select(o => new QuizOptionDto
+                        {
+                            Id = o.Id,
+                            OptionText = o.OptionText,
+                            IsCorrect = o.IsCorrect
+                        }).ToList()
+                    }).ToList()
+                });
+            }
+
+            var flashcardDtos = courseFlashcards.Select(f => new FlashcardDto
+            {
+                Id = f.Id,
+                Front = f.Front,
+                Back = f.Back
+            }).ToList();
+
+            var courseResponse = new CourseResponseDto
+            {
+                Id = course.Id,
+                Title = course.Title,
+                Description = course.Description,
+                Status = course.Status ?? "pending",
+                RejectReason = course.RejectReason,
+                IsDeleted = course.IsDeleted,
+                CategoryId = course.CategoryId,
+                CategoryName = category?.Name,
+                TeacherName = teacherUser?.FullName,
+                TeacherAvatar = teacherUser?.AvatarUrl,
+                AverageRating = averageRating,
+                TotalRatings = courseRatings.Count,
+                CreatedAt = course.CreatedAt,
+                UpdatedAt = course.UpdatedAt,
+                DeletedAt = course.DeletedAt,
+                TotalSections = courseSections.Count,
+                TotalMaterials = totalMaterials,
+                TotalQuizzes = courseQuizzes.Count,
+                TotalQuestions = totalQuestions,
+                TotalFlashcards = courseFlashcards.Count,
+                TotalEnrollments = courseEnrollments.Count,
+                Sections = sectionDtos,
+                Quizzes = quizDtos,
+                Flashcards = flashcardDtos
+            };
+
+            return (true, "Course retrieved successfully", courseResponse);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Error retrieving course: {ex.Message}", null);
+        }
+    }
+
     public async Task<(bool Success, string Message, object? Data)> UpdateCourseAsync(int courseId, int userId, UpdateCourseDto updateCourseDto)
     {
         try

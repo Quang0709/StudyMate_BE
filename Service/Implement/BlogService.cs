@@ -77,10 +77,12 @@ public class BlogService : IBlogService
         }
     }
 
-    public async Task<(bool success, string message, List<PostResponseDto>? data)> GetAllPostsAsync(int? currentUserId, int page, int pageSize)
+    public async Task<(bool success, string message, int totalCount, List<PostResponseDto>? data)> GetAllPostsAsync(int? currentUserId, int page, int pageSize)
     {
         try
         {
+            var totalCount = await _context.Posts.CountAsync(p => !p.IsDeleted);
+
             var posts = await _context.Posts
                 .Where(p => !p.IsDeleted)
                 .Include(p => p.Author)
@@ -97,11 +99,11 @@ public class BlogService : IBlogService
                 return MapPostToDto(p, p.Author, p.PostLikes.Count, p.Comments.Count(c => !c.IsDeleted), isLiked);
             }).ToList();
 
-            return (true, "Posts retrieved successfully", result);
+            return (true, "Posts retrieved successfully", totalCount, result);
         }
         catch (Exception ex)
         {
-            return (false, $"Error retrieving posts: {ex.Message}", null);
+            return (false, $"Error retrieving posts: {ex.Message}", 0, null);
         }
     }
 

@@ -60,6 +60,26 @@ public class CourseController : ControllerBase
         });
     }
 
+    [HttpGet("public/{id}")]
+    [AllowAnonymous]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> GetPublicCourseDetail(int id)
+    {
+        var (success, message, data) = await _courseService.GetPublicCourseDetailAsync(id);
+
+        if (!success)
+        {
+            return BadRequest(new { message });
+        }
+
+        return Ok(new
+        {
+            message,
+            data
+        });
+    }
+
     /// <summary>
     /// Get all active courses created by the logged-in teacher (excludes soft-deleted courses)
     /// </summary>

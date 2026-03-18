@@ -63,6 +63,8 @@ public partial class StudyMateContext : DbContext
     public virtual DbSet<Message> Messages { get; set; }
     public virtual DbSet<PostLike> PostLikes { get; set; }
 
+    public virtual DbSet<Feedback> Feedbacks { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Comment>(entity =>
@@ -278,6 +280,37 @@ public partial class StudyMateContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PostLike_User");
+        });
+
+        modelBuilder.Entity<Feedback>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__feedbacks");
+
+            entity.ToTable("feedbacks", tb =>
+            {
+                tb.HasCheckConstraint("CK_feedbacks_rating_range", "[rating]>=(1) AND [rating]<=(5)");
+            });
+
+            entity.HasIndex(e => e.UserId, "UQ__feedbacks_user_id").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.Rating).HasColumnName("rating");
+            entity.Property(e => e.Comment)
+                .HasMaxLength(1000)
+                .HasColumnName("comment");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Feedbacks)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Feedback_User");
         });
 
         modelBuilder.Entity<PremiumPlan>(entity =>
@@ -817,6 +850,36 @@ public partial class StudyMateContext : DbContext
                 .HasConstraintName("FK_PaymentOrder_User");
         });
 
+        modelBuilder.Entity<Feedback>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__feedbacks");
+
+            entity.ToTable("feedbacks", tb =>
+            {
+                tb.HasCheckConstraint("CK_feedbacks_rating_range", "[rating]>=(1) AND [rating]<=(5)");
+            });
+
+            entity.HasIndex(e => e.UserId, "UQ__feedbacks_user_id").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.Rating).HasColumnName("rating");
+            entity.Property(e => e.Comment)
+                .HasMaxLength(1000)
+                .HasColumnName("comment");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Feedbacks)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Feedback_User");
+        });
         OnModelCreatingPartial(modelBuilder);
     }
 

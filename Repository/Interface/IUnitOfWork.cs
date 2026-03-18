@@ -19,6 +19,7 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<Post> Posts { get; }
     IGenericRepository<Comment> Comments { get; }
     IGenericRepository<PostLike> PostLikes { get; }
+    IGenericRepository<Feedback> Feedbacks { get; }
     IGenericRepository<Transaction> Transactions { get; }
     IGenericRepository<PremiumPlan> PremiumPlans { get; }
     IGenericRepository<UserSubscription> UserSubscriptions { get; }

@@ -45,6 +45,7 @@ namespace StudyMate_BE
             builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
             builder.Services.AddScoped<IBlogService, BlogService>();
             builder.Services.AddScoped<IChatService, ChatService>();
+            builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 
 
             builder.Services.AddHostedService<AdminSeederService>();

@@ -341,6 +341,50 @@ namespace Repository.Migrations
                     b.ToTable("enrollments", (string)null);
                 });
 
+            modelBuilder.Entity("Repository.Model.Feedback", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("comment");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int")
+                        .HasColumnName("rating");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK__feedbacks");
+
+                    b.HasIndex(new[] { "UserId" }, "UQ__feedbacks_user_id")
+                        .IsUnique();
+
+                    b.ToTable("feedbacks", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_feedbacks_rating_range", "[rating]>=(1) AND [rating]<=(5)");
+                        });
+                });
+
             modelBuilder.Entity("Repository.Model.Flashcard", b =>
                 {
                     b.Property<int>("Id")
@@ -1258,6 +1302,17 @@ namespace Repository.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("Repository.Model.Feedback", b =>
+                {
+                    b.HasOne("Repository.Model.User", "User")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("FK_Feedback_User");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Repository.Model.Flashcard", b =>
                 {
                     b.HasOne("Repository.Model.Course", "Course")
@@ -1519,6 +1574,8 @@ namespace Repository.Migrations
             modelBuilder.Entity("Repository.Model.User", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Feedbacks");
 
                     b.Navigation("PaymentOrders");
 

@@ -52,3 +52,9 @@ StudyMate_BE/appsettings.json
 appsettings.Development.json
 **/appsettings.Development.json
 /aspnetapp.pfx
+
+####################################
+# Publish artifacts
+####################################
+publish/
+publish.zip

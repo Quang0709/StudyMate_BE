@@ -113,13 +113,26 @@ namespace StudyMate_BE
             });
 
             // ===================== CORS =====================
+            var allowedOrigins = builder.Configuration
+                .GetSection("Cors:AllowedOrigins")
+                .Get<string[]>() ?? Array.Empty<string>();
+
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", policy =>
+                options.AddPolicy("FrontendPolicy", policy =>
                 {
-                    policy.AllowAnyOrigin()
-                          .AllowAnyMethod()
-                          .AllowAnyHeader();
+                    if (allowedOrigins.Length > 0)
+                    {
+                        policy.WithOrigins(allowedOrigins)
+                              .AllowAnyMethod()
+                              .AllowAnyHeader();
+                    }
+                    else
+                    {
+                        policy.AllowAnyOrigin()
+                              .AllowAnyMethod()
+                              .AllowAnyHeader();
+                    }
                 });
             });
 
@@ -200,7 +213,7 @@ namespace StudyMate_BE
                 });
             }
 
-            app.UseCors("AllowAll");
+            app.UseCors("FrontendPolicy");
 
             app.UseAuthentication(); // 🔥 PHẢI TRƯỚC
             app.UseAuthorization();

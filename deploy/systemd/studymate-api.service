@@ -1,0 +1,17 @@
+[Unit]
+Description=StudyMate Backend API
+After=network.target
+
+[Service]
+WorkingDirectory=/var/www/studymate-api
+ExecStart=/usr/bin/dotnet /var/www/studymate-api/StudyMate_BE.dll
+Restart=always
+RestartSec=5
+KillSignal=SIGINT
+SyslogIdentifier=studymate-api
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://127.0.0.1:5000
+
+[Install]
+WantedBy=multi-user.target

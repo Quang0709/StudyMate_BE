@@ -48,6 +48,7 @@ Thumbs.db
 ####################################
 # App settings (local)
 ####################################
+StudyMate_BE/appsettings.json
 appsettings.Development.json
 **/appsettings.Development.json
 /aspnetapp.pfx

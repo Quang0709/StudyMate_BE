@@ -1,5 +1,5 @@
 param(
-  [string]$SshUser = "studymate-shmg",
+  [string]$SshUser = "root",
   [string]$ServerIp = "14.225.212.91",
   [string]$ApiDomain = "api.fptstudymate.id.vn"
 )

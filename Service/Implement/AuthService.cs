@@ -100,14 +100,40 @@ public class AuthService : IAuthService
 
     public async Task<(bool Success, string Message, AuthResponseDto? Data)> VerifyEmailAsync(string token)
     {
-        // Find verification token
+        // Find verification token (ignoring IsVerified for now to handle idempotency)
+        // Use ToLower() to ensure case-insensitive comparison (safe for hex tokens)
         var verificationToken = await _unitOfWork.EmailVerificationTokens.FirstOrDefaultAsync(
-            t => t.Token == token && !t.IsVerified
+            t => t.Token.ToLower() == token.ToLower()
         );
 
         if (verificationToken == null)
         {
-            return (false, "Invalid or already used verification token", null);
+            return (false, "Invalid verification token", null);
+        }
+
+        // If already verified, check if the user was actually created
+        if (verificationToken.IsVerified)
+        {
+            var userExists = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Email == verificationToken.Email);
+            if (userExists != null)
+            {
+                // Return success if user already exists (idempotent behavior)
+                var existingUserDto = await GetUserDtoAsync(userExists.Id);
+                var newAccessToken = _tokenService.GenerateAccessToken(userExists.Id, userExists.Email, userExists.Role);
+                var newRefreshToken = _tokenService.GenerateRefreshToken();
+                
+                var existingAuthResponse = new AuthResponseDto
+                {
+                    AccessToken = newAccessToken,
+                    RefreshToken = newRefreshToken,
+                    ExpiresAt = DateTime.UtcNow.AddHours(5),
+                    User = existingUserDto!
+                };
+                
+                return (true, "Email already verified. You can proceed to login.", existingAuthResponse);
+            }
+            
+            return (false, "Verification token has already been used.", null);
         }
 
         if (verificationToken.ExpiryDate < DateTime.UtcNow)
